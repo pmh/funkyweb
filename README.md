@@ -1,6 +1,6 @@
 # funkyweb
 
-funkyweb is a route inferring clojure web framework. It uses the 
+funkyweb is a clojure web framework with route inference. It uses the 
 name of the namespace and macros to generate routes and url helpers.
 
 
