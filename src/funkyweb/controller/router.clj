@@ -5,10 +5,27 @@
 (def route-map {:get  (atom {}) :put    (atom {})
                 :post (atom {}) :delete (atom {})})
 
-(defn strip-type-hints [args]
+(defn strip-type-hints
+  "Takes an argument list and removes any
+  type-hints it may contain.
+  
+  (strip-type-hints [:int 'a :int 'b]) ;=> ['a 'b]
+  
+  (strip-type-hints ['a 'b]) ;=> ['a 'b]"
+  [args]
   (filter #(not (= :int %)) args))
 
-(defn cast-hinted-args [args-list values]
+(defn cast-hinted-args
+  "Takes the original argument list and the
+  real values parsed from the url and replaces
+  type-hints with type-casts
+
+  (cast-hinted-args [:int 'a :int 'b] [\"1\" \"2\"])
+      ;=> [(Integer/parseInt \"1\") (Integer/parseInt \"2\")]
+
+  (cast-hinted-args [:int 'a 'b] [\"1\" \"2\"])
+      ;=> [(Integer/parseInt \"1\") \"2\"]"
+  [args-list values]
   (loop [args args-list, vals values, ret []]
     (if (seq args)
       (if (= :int (first args))
