@@ -5,12 +5,17 @@
 (def route-map {:get  (atom {}) :put    (atom {})
                 :post (atom {}) :delete (atom {})})
 
-(defn add-route
-  "Looks up method in the route-map, associates
-  route with action and adds them to the map it
-  references"
-  [method route action]
-  (swap! (method route-map) assoc route action))
+(defn strip-type-hints [args]
+  (filter #(not (= :int %)) args))
+
+(defn cast-hinted-args [args-list values]
+  (loop [args args-list, vals values, ret []]
+    (if (seq args)
+      (if (= :int (first args))
+        (recur (rest (rest args)) (rest vals)
+               (conj ret (Integer/parseInt (first vals))))
+        (recur (rest args) (rest vals) (conj ret (first vals))))
+      ret)))
 
 (defn ns-name-to-str
   "Grabs the ns-name of *ns* and calls str on it"
@@ -60,6 +65,15 @@
   [name args]
   (build-uri name args))
 
+(defn add-route
+  "Looks up method in the route-map, associates
+  route with action and adds them to the map it
+  references"
+  [method name args action]
+  (swap! (method route-map) assoc (build-route name (strip-type-hints args))
+         {:action action :args-list args}))
+
+
 (defn match-route
   "Finds the route, if any, which matches the uri.
   Returns the route and the matched keywords.
@@ -82,5 +96,6 @@
   (let [method       (:request-method req)
         uri          (:uri req)
         [route args] (some (partial match-route uri) (keys @(method route-map)))]
-    (if-let [action (get @(method route-map) route)]
-      (apply action args))))
+    (if-let [match (get @(method route-map) route)]
+      (apply (:action match)
+             (cast-hinted-args (:args-list match) (reverse args))))))

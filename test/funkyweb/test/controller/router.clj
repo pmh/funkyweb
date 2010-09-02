@@ -3,19 +3,40 @@
   (:use [clojure.test]))
 
 (deftest test-route-map
-  (are [key] (= @(key route-map) {})
+  (are [key] (not (nil? (key route-map)))
        :get :put :post :delete))
 
+(deftest test-strip-type-hints
+  (are [args-list expected]
+       (= (strip-type-hints args-list))
+       [:int 'a :int 'b :int 'c] ['a 'b 'c]
+       ['a :int 'b :int 'c]      ['a 'b 'c]
+       [:int 'a :int 'b 'c]      ['a 'b 'c]
+       ['a 'b :int 'c]           ['a 'b 'c]
+       ['a 'b 'c]                ['a 'b 'c]))
+
+(deftest test-cast-hinted-args
+  (are [args-list values expected]
+       (= (cast-hinted-args args-list values) expected)
+       [:int 'a :int 'b]    ["1" "2"]     [1 2]
+       [:int 'a :int 'b 'c] ["1" "2" "3"] [1 2 "3"]
+       ['a 'b 'c]           ["1" "2" "3"] ["1" "2" "3"]))
 
 (deftest test-add-route
-  (are [method route action]
+  (are [method name args action]
        (do
-         (add-route method route action)
-         (= @(method route-map) {route action}))
-       :get    "foo" "bar"
-       :put    "foo" "bar"
-       :post   "foo" "bar"
-       :delete "foo" "bar"))
+         (binding [controller-name (fn [] "dashboard")]
+           (add-route method name args action)
+           (= @(method route-map) {"/dashboard/foo/:bar" {:action    action
+                                                          :args-list args}})))
+       :get    'foo ['bar]      "baz"
+       :get    'foo [:int 'bar] "baz"
+       :put    'foo ['bar]      "baz"
+       :put    'foo [:int 'bar] "baz"
+       :post   'foo ['bar]      "baz"
+       :post   'foo [:int 'bar] "baz"
+       :delete 'foo ['bar]      "baz"
+       :delete 'foo [:int 'bar] "baz"))
 
 (deftest test-ns-name-to-str
   (binding [*ns* (create-ns 'funkyweb.test.controller.router)]
@@ -53,7 +74,8 @@
 
 (deftest test-execute
   (are [req expected]
-       (binding [deref (fn [_] {"/show/:id" (fn [id] id)})]
+       (binding [deref (fn [_] {"/show/:id" {:action    (fn [id] id)
+                                            :args-list ['id]}})]
          (= (execute req) expected))
        {:request-method :get :uri "/show/10"} "10"
        {:request-method :get :uri "/foo"}     nil))
