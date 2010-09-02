@@ -4,14 +4,13 @@
 
 
 (defmacro GET [name args & forms]
-  (do
-    `(let [ns# *ns*]
-       (add-route :get '~name '~args
-                  (fn [~@(strip-type-hints args)]
-                    ~@forms))
-       (defn ~name [~@(strip-type-hints args)]
-         (binding [*ns* ns#]
-           (build-path '~name (strip-type-hints ~args)))))))
+  `(let [ns# *ns*]
+     (add-route :get '~name '~args
+                (fn [~@(strip-type-hints args)]
+                  ~@forms))
+     (defn ~name [~@(strip-type-hints args)]
+       (binding [*ns* ns#]
+         (build-path '~name (strip-type-hints ~args))))))
 
 (defn generate-response [status body]
   {:status  status
