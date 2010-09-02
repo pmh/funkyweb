@@ -58,12 +58,26 @@ would return the url /dashboard/foo/baz.
     ; http://localhost:8080/dashboard/hello-foo     
       ;=> <a href='/dashboard/say-hello/foo'>Say hello to foo</a>
 
+
+## Type-hints
+
+You can add type-hints to your argument lists in order to inform the
+framework how it should parse the parameters, for example:
+
+    (GET add [:int a :int b]
+        (str a " + " b " = " (+ a b)))
+
+In the previous example funkyweb turned a and b into integers before
+executing your action.
+
+Only :int is supported for now.
+
 ## Installation
 
 FIXME: write me
 
 ## License
 
-Copyright (C) 2010 FIXME
+Copyright (C) 2010 Patrik Hedman
 
 Distributed under the Eclipse Public License, the same as Clojure.
