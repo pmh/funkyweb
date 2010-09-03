@@ -4,15 +4,15 @@
 
 (defmacro GET [name args & forms]
   `(let [ns# *ns*]
-     (add-route :get '~name (replace-varargs-with-star '~args)
-                (fn [~@(strip-type-hints args)]
-                  ~@forms))
      (defn ~name [~@(strip-type-hints args)]
        (binding [*ns* ns#]
          (let [& "&"]
            (build-path '~name
                        (flatten
-                        (strip-type-hints (filter #(not (= "&" %)) ~args)))))))))
+                        (strip-type-hints (filter #(not (= "&" %)) ~args)))))))
+     (add-route :get '~name (replace-varargs-with-star '~args)
+                (fn [~@(strip-type-hints args)]
+                  ~@forms))))
 
 (defn generate-response [status body]
   {:status  status
