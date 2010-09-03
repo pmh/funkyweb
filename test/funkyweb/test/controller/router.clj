@@ -27,8 +27,8 @@
        (do
          (binding [controller-name (fn [] "dashboard")]
            (add-route method name args action)
-           (= @(method route-map) {"/dashboard/foo/:bar" {:action    action
-                                                          :args-list args}})))
+           (= @(method route-map) {"/dashboard/foo/:bar/" {:action    action
+                                                           :args-list args}})))
        :get    'foo ['bar]      "baz"
        :get    'foo [:int 'bar] "baz"
        :put    'foo ['bar]      "baz"
@@ -53,9 +53,9 @@
   (are [name args expected]
        (binding [ns-name-to-str #(str "some-ns.controllers.dashboard")]
          (= (build-route name args) expected))
-       'foo []          "/dashboard/foo"
-       'foo [:bar]      "/dashboard/foo/:bar"
-       'foo ['bar 'baz] "/dashboard/foo/:bar/:baz"))
+       'foo []          "/dashboard/foo/"
+       'foo [:bar]      "/dashboard/foo/:bar/"
+       'foo ['bar 'baz] "/dashboard/foo/:bar/:baz/"))
 
 (deftest test-build-path
   (are [name args expected]
@@ -72,17 +72,37 @@
        "/show/10/10" "/show/:id" nil
        "/show/10"    "/foo/:id"  nil))
 
+(deftest test-append-slash
+  (are [s expected]
+       (= (append-slash s) expected)
+       "foo"      "foo/"
+       "foo/"     "foo/"
+       "foo/bar"  "foo/bar/"
+       "foo/bar/" "foo/bar/"))
+
+(deftest test-parse-args-list
+  (are [args expected]
+       (= (parse-args-list args) expected)
+       ["foo" "bar"]          ["foo" "bar"]
+       ["foo" "bar/baz"]      ["foo" "bar" "baz"]
+       ["foo" "bar/baz/quux"] ["foo" "bar" "baz" "quux"]))
+
+(deftest test-replace-varargs-with-star
+  (= (replace-varargs-with-star ['& 'args])           ["*"])
+  (= (replace-varargs-with-star ['foo '& 'args])      ['foo "*"])
+  (= (replace-varargs-with-star ['foo 'bar '& 'args]) ['foo 'bar "*"]))
+
 (deftest test-execute
   (are [req expected]
-       (binding [deref (fn [_] {"/show/:id" {:action    (fn [id] id)
-                                            :args-list ['id]}})]
+       (binding [deref (fn [_] {"/show/:id/" {:action    (fn [id] id)
+                                             :args-list ['id]}})]
          (= (execute req) expected))
-       {:request-method :get :uri "/show/10"} "10"
-       {:request-method :get :uri "/foo"}     nil))
+       {:request-method :get :uri "/show/10/"} "10"
+       {:request-method :get :uri "/foo/"}     nil))
 
 (deftest test-execute-raises
   (are [req expected]
-       (binding [deref (fn [_] {"/show/:id"
+       (binding [deref (fn [_] {"/show/:id/"
                                (fn [id] (throw (RuntimeException. "foo")))})]
          (= (try (execute req) (catch RuntimeException e "Exception raised"))
             expected))

@@ -39,4 +39,16 @@
   (deftest test-add-builds-a-uri
     (= (add 1 2) "/dashboard/say-hello/1/2"))
   (deftest test-say-hello-action-method-returns-body
-    (= (execute :get "/dashboard/add/1/2") "1 + 2 = 3")))
+    (= (execute :get "/dashboard/add/1/2") "1 + 2 = 3"))
+
+
+  (GET stuff [& stuff] (str stuff))
+
+  (deftest test-stuff-builds-a-uri
+    (= (stuff)             "/dashboard/stuff")
+    (= (stuff "foo")       "/dashboard/stuff/foo")
+    (= (stuff "foo" "bar") "/dashboard/stuff/foo/bar"))
+  (deftest test-stuff-action-method-returns-body
+    (= (execute :get "/dashboard/stuff")         "")
+    (= (execute :get "/dashboard/stuff/foo")     "(\"foo\")")
+    (= (execute :get "/dashboard/stuff/foo/bar") "(\"foo\" \"bar\")")))

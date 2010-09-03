@@ -1,6 +1,7 @@
 (ns funkyweb.controller.router
-  (:use [clojure.contrib.str-utils])
-  (:use [clout.core]))
+  (:use [clojure.contrib.str-utils]
+        [funkyweb.str-utils]
+        [clout.core]))
 
 (def route-map {:get  (atom {}) :put    (atom {})
                 :post (atom {}) :delete (atom {})})
@@ -58,7 +59,7 @@
   (let [base (str "/" (controller-name) "/" name)]
     (if (seq args)
       (str base "/" (str-join "/" args))
-      base)))
+      (str base))))
 
 (defn build-route
   "Builds a route from the name and args
@@ -69,7 +70,8 @@
   (binding [*ns* (create-ns 'myapp.controllers.foo)]
     (build-route 'show '[bar baz])) ;=> /foo/show/:bar/:baz"
   [name args]
-  (build-uri name (map keyword args)))
+  (let [keyworded-args (into [] (map keyword (filter #(not (= "*" %)) args)))]
+    (build-uri name (conj keyworded-args (first (filter #(= "*" %) args))))))
 
 (defn build-path
   "Builds a path from the name and args
@@ -104,6 +106,54 @@
   (if-let [match (route-matches route uri)]
     [route (vals match)]))
 
+(defn append-slash
+  "Appends a forward slash to the end of the string
+  unless one is already present
+
+  (append-slash \"foo\")
+    ;=> \"foo/\"
+
+  (append-slash \"foo/\")
+    ;=> \"foo/\""
+  [s]
+  (if (ends-with? "/" s)
+    s
+    (str s "/")))
+
+(defn parse-args-list
+  "Variadic arguments are passed in as a string with the
+  arguments separated by slashes (/). This functions turns
+  that string into a sequence and conjoins it with the other
+  arguments.
+
+  (parse-args-list [\"a\" \"b\" \"c/d/e\"])
+    ;=> (\"a\" \"b\" \"c\" \"d\" \"e\")
+
+  (parse-args-list [\"a\" \"b\"])
+    ;=> (\"a\" \"b\")"
+  [args]
+  (let [var-args (re-split #"\/" (last (flatten args)))]
+    (into (apply vector (butlast args))
+          (if-not (empty? (first var-args)) var-args []))))
+
+(defn replace-varargs-with-star [args]
+  "Searches parameter list for a variadic declaration
+  and replaces it with a star (*) if found
+
+  (replace-varargs-with-star ['foo & args])
+    ;=> ['foo \"*\"]
+
+  (replace-varargs-with-star ['foo & stuff]
+    ;=> ['foo \"*\"]"
+  (if (some #(= '& %) args)
+    (loop [a args ret []]
+      (if (seq a)
+        (if (= '& (first a))
+          (recur [] (conj ret "*"))
+          (recur (rest a) (conj ret (first a))))
+        ret))
+    args))
+
 (defn execute
   "Extracts the request-method and uri from the request
   and tries to find a route matching that signature.
@@ -111,8 +161,11 @@
   if one is found or nil otherwise"
   [req]
   (let [method       (:request-method req)
-        uri          (:uri req)
+        uri          (append-slash (:uri req))
         [route args] (some (partial match-route uri) (keys @(method route-map)))]
     (if-let [match (get @(method route-map) route)]
-      (apply (:action match)
-             (cast-hinted-args (:args-list match) (reverse args))))))
+      (let [type-casted-args (cast-hinted-args (:args-list match) (reverse args))]
+        (apply (:action match)
+               (if (= "*" (last (:args-list match)))
+                 (parse-args-list type-casted-args)
+                 type-casted-args))))))

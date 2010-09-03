@@ -2,15 +2,17 @@
   (:use funkyweb.controller.router)
   (:use (ring.middleware reload stacktrace)))
 
-
 (defmacro GET [name args & forms]
   `(let [ns# *ns*]
-     (add-route :get '~name '~args
+     (add-route :get '~name (replace-varargs-with-star '~args)
                 (fn [~@(strip-type-hints args)]
                   ~@forms))
      (defn ~name [~@(strip-type-hints args)]
        (binding [*ns* ns#]
-         (build-path '~name (strip-type-hints ~args))))))
+         (let [& "&"]
+           (build-path '~name
+                       (flatten
+                        (strip-type-hints (filter #(not (= "&" %)) ~args)))))))))
 
 (defn generate-response [status body]
   {:status  status
