@@ -89,8 +89,10 @@
   route with action and adds them to the map it
   references"
   [method name args action]
-  (swap! (method route-map) assoc (build-route name (strip-type-hints args))
-         {:action action :args-list args}))
+  (do
+    (swap! (method route-map) assoc (build-route name (strip-type-hints args))
+           {:action action :args-list args})
+    nil))
 
 
 (defn match-route
