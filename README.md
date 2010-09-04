@@ -48,7 +48,10 @@ would return the url /dashboard/foo/baz.
     (GET hello-foo []
          (str "<a href='" (say-hello "foo") "'>Say hello to foo</a>"))
     
+    (GET the-stuff [& stuff]
+        (str "args: " args))
     
+
     (future (server run-jetty {:port 8080}))
     
     
@@ -57,6 +60,15 @@ would return the url /dashboard/foo/baz.
     
     ; http://localhost:8080/dashboard/hello-foo     
       ;=> <a href='/dashboard/say-hello/foo'>Say hello to foo</a>
+
+    ; http://localhost:8080/dashboard/the-stuff/
+      ;=> "args: "
+
+    ; http://localhost:8080/dashboard/the-stuff/foo
+      ;=> "args: ("foo")"
+
+    ; http://localhost:8080/dashboard/the-stuff/foo/bar
+      ;=> "args: ("foo" "bar")"
 
 
 ## Type-hints
