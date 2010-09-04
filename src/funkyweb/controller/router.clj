@@ -77,10 +77,10 @@
   "Builds a path from the name and args
   
   (binding [*ns* (create-ns 'myapp.controllers.foo)]
-    (build-route 'show [])) ;=> /foo/show
+    (build-path 'show [])) ;=> /foo/show
   
   (binding [*ns* (create-ns 'myapp.controllers.foo)]
-    (build-route 'show [1 2])) ;=> /foo/show/1/2"
+    (build-path 'show [1 2])) ;=> /foo/show/1/2"
   [name args]
   (build-uri name args))
 
