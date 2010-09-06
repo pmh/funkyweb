@@ -90,6 +90,54 @@ number of parameters.
     
     (future (server run-jetty {:port 8080}))
 
+    ; http://localhost:8080/var-args-demo/the-stuff/
+      ;=> "stuff: "
+
+    ; http://localhost:8080/var-args-demo/the-stuff/foo
+      ;=> "stuff: ("foo")"
+
+    ; http://localhost:8080/var-args-demo/the-stuff/foo/bar
+      ;=> "stuff: ("foo" "bar")"
+    
+
+## URL Helpers
+
+Whenever you define an action a function with the same name and
+parameters is generated that builds a url for you, for example:
+
+    (ns my-app.controllers.url-helpers-demo
+        (:use [funkyweb.controller]
+              [ring.adapter.jetty]))
+
+    (GET say-hello [name]
+         (str "Hello, " name "!"))
+
+    (GET hello-foo []
+         (str "<a href='" (say-hello "foo") "'>Say hello to foo</a>"))    
+
+    
+    (future (server run-jetty {:port 8080}))
+
+
+    ; http://localhost:8080/url-helpers-demo/hello-foo
+    ;=> <a href="/url-helpers-demo/say-hello/foo">Say hello to foo</a>
+
+## Variadic arguments
+
+You can also use variadic arguments in your args list to match any
+number of parameters.
+
+    (ns my-app.controllers.var-args-demo
+      (:use [funkyweb.controller]
+            [ring.adapter.jetty]))
+    
+    
+    (GET the-stuff [& stuff]
+        (str "stuff: " stuff))
+
+    
+    (future (server run-jetty {:port 8080}))
+
 
     ; http://localhost:8080/var-args-demo/the-stuff/
       ;=> "stuff: "
