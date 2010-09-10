@@ -35,5 +35,7 @@
 (def app (-> #'handler
              (wrap-stacktrace)))
 
-(defn server [adapter-fn options]
-  (adapter-fn (var app) options))
+(defn server
+  ([adapter-fn] (server adapter-fn {}))
+  ([adapter-fn options]
+     (adapter-fn app (merge {:port 8080 :join? false} options))))
