@@ -6,6 +6,8 @@
 (def route-map {:get  (atom {}) :put    (atom {})
                 :post (atom {}) :delete (atom {})})
 
+(def error-map (atom {}))
+
 (defn strip-type-hints
   "Takes an argument list and removes any
   type-hints it may contain.
@@ -94,6 +96,8 @@
            {:action action :args-list args})
     nil))
 
+(defn add-error-handler [status-code body]
+  (do (swap! error-map assoc status-code body)))
 
 (defn match-route
   "Finds the route, if any, which matches the uri.

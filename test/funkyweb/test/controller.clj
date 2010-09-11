@@ -1,5 +1,5 @@
 (ns funkyweb.test.controller
-  (:use [funkyweb.controller]        :reload-all)
+  (:use [funkyweb.controller] :reload-all)
   (:use [clojure.test]))
 
 (binding [*ns* (create-ns 'myapp.controllers.dashboard)]
@@ -51,4 +51,10 @@
   (deftest test-stuff-action-method-returns-body
     (= (execute :get "/dashboard/stuff")         "")
     (= (execute :get "/dashboard/stuff/foo")     "(\"foo\")")
-    (= (execute :get "/dashboard/stuff/foo/bar") "(\"foo\" \"bar\")")))
+    (= (execute :get "/dashboard/stuff/foo/bar") "(\"foo\" \"bar\")"))
+
+
+  (error 404 "404 - Not found")
+
+  (deftest test-invalid-route-returns-404-message
+    (= (execute :get "/im/a/404") "404 - Not found")))

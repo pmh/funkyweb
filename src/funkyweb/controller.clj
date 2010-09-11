@@ -21,6 +21,9 @@
     (construct-url-helper ~name ~args)
     (construct-route :get ~name ~args ~forms)))
 
+(defn error [status-code body]
+  (add-error-handler status-code body))
+
 (defn generate-response [status body]
   {:status  status
    :headers {"Content-Type" "text/html"}
@@ -29,7 +32,7 @@
 (defn handler [req]
   (if-let [body (execute req)]
     (generate-response 200 body)
-    (generate-response 404 "404 - not found")))
+    (generate-response 404 (get @error-map 404))))
 
 
 (def app (-> #'handler

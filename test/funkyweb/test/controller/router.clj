@@ -38,6 +38,15 @@
        :delete 'foo ['bar]      "baz"
        :delete 'foo [:int 'bar] "baz"))
 
+(deftest test-add-error-handler
+  (are [status-code body]
+       (do
+         (add-error-handler status-code body)
+         (is (some #(= % [status-code body]) @error-map)))
+       404 "404 - not found"
+       500 "500 - internal server error"
+       522 "The change you wanted was rejected."))
+
 (deftest test-ns-name-to-str
   (binding [*ns* (create-ns 'funkyweb.test.controller.router)]
     (is (= "funkyweb.test.controller.router" (ns-name-to-str)))))
