@@ -25,7 +25,7 @@
 (deftest test-add-route
   (are [method name args action]
        (do
-         (binding [controller-name (fn [] "dashboard")]
+         (binding [*controller-name* "dashboard"]
            (add-route method name args action)
            (= @(method route-map) {"/dashboard/foo/:bar/" {:action    action
                                                            :args-list args}})))
@@ -47,20 +47,9 @@
        500 "500 - internal server error"
        522 "The change you wanted was rejected."))
 
-(deftest test-ns-name-to-str
-  (binding [*ns* (create-ns 'funkyweb.test.controller.router)]
-    (is (= "funkyweb.test.controller.router" (ns-name-to-str)))))
-
-(deftest test-controller-name
-  (are [ns-name expected]
-       (binding [ns-name-to-str #(str ns-name)]
-         (= (controller-name) expected))
-       "some-ns.controllers.dashboard" "dashboard"
-       "some-ns.controllers.blog.post" "blog/post"))
-
 (deftest test-build-route
   (are [name args expected]
-       (binding [ns-name-to-str #(str "some-ns.controllers.dashboard")]
+       (binding [*controller-name* "dashboard"]
          (= (build-route name args) expected))
        'foo []          "/dashboard/foo/"
        'foo [:bar]      "/dashboard/foo/:bar/"
@@ -68,7 +57,7 @@
 
 (deftest test-build-path
   (are [name args expected]
-       (binding [ns-name-to-str #(str "some-ns.controllers.dashboard")]
+       (binding [*controller-name* "dashboard"]
          (= (build-path name args) expected))
        'bar []      "/dashboard/bar"
        'foo [10]    "/dashboard/foo/10"

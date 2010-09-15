@@ -2,59 +2,66 @@
   (:use [funkyweb.controller] :reload-all)
   (:use [clojure.test]))
 
-(binding [*ns* (create-ns 'myapp.controllers.dashboard)]
+(defcontroller dashboard
 
   (defn execute [method uri]
     (funkyweb.controller.router/execute {:request-method method :uri uri}))
 
-
   (GET no-params [] "dashboard#no-params")
-  
-  (deftest test-no-params-builds-a-uri
-    (= (no-params) "/dashboard/no-params"))
-  (deftest test-no-params-action-method-returns-body
-    (= (execute :get "/dashboard/no-params") "dashboard#no-params"))
-
 
   (GET say-hello [name] (str "Hello, " name "!"))
 
-  (deftest test-say-hello-builds-a-uri
-    (= (say-hello "foo") "/dashboard/say-hello/foo"))
-  (deftest test-say-hello-action-method-returns-body
-    (= (execute :get "/dashboard/say-hello/foo") "Hello, foo!"))
-
-
   (GET hello-foo []
-       (str "<a href='" (say-hello "foo") "'>Say hello to foo" "</a>"))
-
-  (deftest test-hello-foo-builds-a-uri
-    (= (hello-foo) "/dashboard/hello-foo"))
-  (deftest test-hello-foo-action-method-returns-body
-    (= (execute :get "/dashboard/hello-foo")
-       "<a href='/dashboard/say-hello/foo'>Say hello to foo</a>"))
-
+    (str "<a href='" (say-hello "foo") "'>Say hello to foo" "</a>"))  
 
   (GET add [:int a :int b] (str a " + " b " = " (+ a b)))
 
-  (deftest test-add-builds-a-uri
-    (= (add 1 2) "/dashboard/say-hello/1/2"))
-  (deftest test-say-hello-action-method-returns-body
-    (= (execute :get "/dashboard/add/1/2") "1 + 2 = 3"))
-
-
   (GET stuff [& stuff] (str stuff))
 
-  (deftest test-stuff-builds-a-uri
-    (= (stuff)             "/dashboard/stuff")
-    (= (stuff "foo")       "/dashboard/stuff/foo")
-    (= (stuff "foo" "bar") "/dashboard/stuff/foo/bar"))
-  (deftest test-stuff-action-method-returns-body
-    (= (execute :get "/dashboard/stuff")         "")
-    (= (execute :get "/dashboard/stuff/foo")     "(\"foo\")")
-    (= (execute :get "/dashboard/stuff/foo/bar") "(\"foo\" \"bar\")"))
-
-
   (error 404 "404 - Not found")
+  
+  (let [route-map funkyweb.controller.router/route-map
+        error-map funkyweb.controller.router/error-map]
 
-  (deftest test-invalid-route-returns-404-message
-    (= (execute :get "/im/a/404") "404 - Not found")))
+    (deftest test-no-params-builds-a-uri
+      (is (= (no-params) "/dashboard/no-params")))
+    (deftest test-no-params-action-method-returns-body
+      (binding [funkyweb.controller.router/route-map route-map]
+        (is (= (execute :get "/dashboard/no-params")
+               "dashboard#no-params"))))
+    
+    (deftest test-say-hello-builds-a-uri
+      (is (= (say-hello "foo") "/dashboard/say-hello/foo")))
+    (deftest test-say-hello-action-method-returns-body
+      (binding [funkyweb.controller.router/route-map route-map]
+        (is (= (execute :get "/dashboard/say-hello/foo") "Hello, foo!"))))
+    
+    (deftest test-hello-foo-builds-a-uri
+      (is (= (hello-foo) "/dashboard/hello-foo")))
+    (deftest test-hello-foo-action-method-returns-body
+      (binding [funkyweb.controller.router/route-map route-map]
+        (is (= (execute :get "/dashboard/hello-foo")
+               "<a href='/dashboard/say-hello/foo'>Say hello to foo</a>"))))
+    
+    (deftest test-add-builds-a-uri
+      (is (= (add 1 2) "/dashboard/add/1/2")))
+    (deftest test-add-action-method-returns-body
+      (binding [funkyweb.controller.router/route-map route-map]
+        (is (= (execute :get "/dashboard/add/1/2") "1 + 2 = 3"))))
+    
+    (deftest test-stuff-builds-a-uri
+      (is (= (stuff)             "/dashboard/stuff/"))
+      (is (= (stuff "foo")       "/dashboard/stuff/foo"))
+      (is (= (stuff "foo" "bar") "/dashboard/stuff/foo/bar")))
+    (deftest test-stuff-action-method-returns-body
+      (binding [funkyweb.controller.router/route-map route-map]
+        (is (= (execute :get "/dashboard/stuff/")         ""))
+        (is (= (execute :get "/dashboard/stuff/foo")     "(\"foo\")"))
+        (is (= (execute :get "/dashboard/stuff/foo/bar") "(\"foo\" \"bar\")"))))
+    
+    (deftest test-invalid-route-returns-404-message
+      (binding [funkyweb.controller.router/error-map error-map]
+        (is (= (handler {:request-method :get :uri "/im/a/404"})
+               {:status 404,
+                :headers {"Content-Type" "text/html"},
+                :body "404 - Not found"}))))))

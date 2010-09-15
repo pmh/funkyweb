@@ -2,10 +2,17 @@
   (:use funkyweb.controller.router)
   (:use (ring.middleware stacktrace)))
 
+(defmacro defcontroller [controller-name & forms]
+  `(do (binding [*controller-name* (str '~controller-name)]
+         ~@forms)
+       nil))
+
 (defmacro construct-url-helper [name args]
-  `(let [ns# *ns*]
+  `(let [ns# *ns*
+         controller-name# *controller-name*]
      (defn ~name [~@(strip-type-hints args)]
-       (binding [*ns* ns#]
+       (binding [*ns* ns#
+                 *controller-name* controller-name#]
          (let [& "&"]
            (build-path '~name
                        (flatten
@@ -18,8 +25,8 @@
 
 (defmacro GET [name args & forms]
   `(do
-    (construct-url-helper ~name ~args)
-    (construct-route :get ~name ~args ~forms)))
+     (construct-url-helper ~name ~args)
+     (construct-route :get ~name ~args ~forms)))
 
 (defn error [status-code body]
   (add-error-handler status-code body))
