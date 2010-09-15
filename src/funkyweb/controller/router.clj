@@ -3,6 +3,8 @@
         [funkyweb.str-utils]
         [clout.core]))
 
+(def *controller-name* nil)
+
 (def route-map {:get  (atom {}) :put    (atom {})
                 :post (atom {}) :delete (atom {})})
 
@@ -37,28 +39,8 @@
         (recur (rest args) (rest vals) (conj ret (first vals))))
       ret)))
 
-(defn ns-name-to-str
-  "Grabs the ns-name of *ns* and calls str on it"
-  []
-  (str (ns-name *ns*)))
-
-(defn controller-name
-  "Grabs the name of the current namespace and
-  extracts everything after 'controllers',
-  replacing . with / in the process.
-
-  (binding [*ns* (create-ns 'myapp.controllers.foo)]
-    (controller-name)) ;=> 'foo'
-  
-  (binding [*ns* (create-ns 'myapp.controllers.foo.bar)]
-    (controller-name)) ;=> 'foo/bar'"
-  []
-  (re-gsub #"\." "/"
-           (last
-            (re-find #".*\.controllers\.(.*)" (ns-name-to-str)))))
-
 (defn- build-uri [name args]
-  (let [base (str "/" (controller-name) "/" name)]
+  (let [base (str "/" *controller-name* "/" name)]
     (if (seq args)
       (str base "/" (str-join "/" args))
       (str base))))
