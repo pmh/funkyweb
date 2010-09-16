@@ -1,5 +1,5 @@
 (ns funkyweb.test.controller
-  (:use [funkyweb.controller] :reload-all)
+  (:use [funkyweb controller server] :reload-all)
   (:use [clojure.test]))
 
 (defcontroller dashboard
