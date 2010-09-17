@@ -6,7 +6,7 @@
 (defmacro wrap!
   "Lets you specify the middlewares you want to use.
     (wrap! (wrap-session cookie-store))
-    => (def handler (wrap-session foo cookie-store))"
+    => (def handler (wrap-session handler cookie-store))"
   [& middlewares]
   `(alter-var-root
     #'handler
@@ -23,4 +23,6 @@
 (defn server
   ([adapter-fn] (server adapter-fn {}))
   ([adapter-fn options]
-     (adapter-fn app (merge {:port 8080 :join? false} options))))
+     (do (wrap! (wrap-session)
+                (wrap-cookies))
+         (adapter-fn handler (merge {:port 8080 :join? false} options)))))
