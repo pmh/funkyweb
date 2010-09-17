@@ -48,6 +48,13 @@
     (deftest test-add-action-method-returns-body
       (binding [funkyweb.controller.router/route-map route-map]
         (is (= (execute :get "/dashboard/add/1/2") "1 + 2 = 3"))))
+    (deftest test-add-action-method-returns-404-for-non-numeric-routes
+      (binding [funkyweb.controller.router/error-map error-map]
+        (is (= (handler {:request-method :get
+                         :uri "/dashboard/add/1/foo"})
+               {:status 404,
+                :headers {"Content-Type" "text/html"},
+                :body "404 - Not found"}))))
     
     (deftest test-stuff-builds-a-uri
       (is (= (stuff)             "/dashboard/stuff/"))

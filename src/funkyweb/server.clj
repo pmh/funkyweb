@@ -4,9 +4,12 @@
         (ring.middleware stacktrace)))
 
 (defn handler [req]
-  (if-let [body (execute req)]
-    (render [200 body])
-    (render [404 (get @error-map 404)])))
+  (try
+    (if-let [body (execute req)]
+      (render [200 body])
+      (render [404 (get @error-map 404)]))
+    (catch java.lang.NumberFormatException e
+        (render [404 (get @error-map 404)]))))
 
 
 (def app (-> #'handler
