@@ -14,29 +14,38 @@
   "Takes an argument list and removes any
   type-hints it may contain.
   
-  (strip-type-hints [:int 'a :int 'b]) ;=> ['a 'b]
-  
-  (strip-type-hints ['a 'b]) ;=> ['a 'b]"
+  (strip-type-hints [:int 'a :float 'b :double 'c])
+    ;=> ['a 'b 'c]
+
+  (strip-type-hints ['a 'b])
+    ;=> ['a 'b]"
   [args]
-  (filter #(not (= :int %)) args))
+  (filter (complement #{:int :double :float}) args))
 
 (defn cast-hinted-args
   "Takes the original argument list and the
   real values parsed from the url and replaces
   type-hints with type-casts
 
-  (cast-hinted-args [:int 'a :int 'b] [\"1\" \"2\"])
-      ;=> [(Integer/parseInt \"1\") (Integer/parseInt \"2\")]
+  (cast-hinted-args [:int 'a] [\"1\"])
+      ;=> [(Integer/parseInt \"1\")]
 
-  (cast-hinted-args [:int 'a 'b] [\"1\" \"2\"])
-      ;=> [(Integer/parseInt \"1\") \"2\"]"
+  (cast-hinted-args [:float 'a] [\"1.2\"])
+      ;=> [(Float/parseFloat \"1.2\")]
+
+  (cast-hinted-args [:double 'a] [\"4.6\"])
+      ;=> [(Double/parseDouble \"4.6\")]"
   [args-list values]
   (loop [args args-list, vals values, ret []]
     (if (seq args)
-      (if (= :int (first args))
-        (recur (rest (rest args)) (rest vals)
-               (conj ret (Integer/parseInt (first vals))))
-        (recur (rest args) (rest vals) (conj ret (first vals))))
+      (condp = (first args)
+          :int    (recur (rest (rest args)) (rest vals)
+                         (conj ret (Integer/parseInt (first vals))))
+          :float  (recur (rest (rest args)) (rest vals)
+                         (conj ret (Float/parseFloat (first vals))))
+          :double (recur (rest (rest args)) (rest vals)
+                         (conj ret (Double/parseDouble (first vals))))
+          (recur (rest args) (rest vals) (conj ret (first vals))))
       ret)))
 
 (defn- build-uri [name args]
@@ -89,10 +98,14 @@
     ;=> [\"/product/:id\" (10)]
 
   (match-route \"/product/10/20\" \"/product/:id/:limit\")
-    ;=> [\"/product/:id/:limit\" (10 20)]"
+    ;=> [\"/product/:id/:limit\" (10 20)]
+  
+  (match-route \"/product/10.26\" \"/product/:price\")
+    ;=> [\"/product/:id/:limit\" (10.26 20)]"
   [uri route]
-  (if-let [match (route-matches route uri)]
-    [route (vals match)]))
+  (let [escaped-uri (apply str (replace {\. \-} uri))]
+    (if-let [match (route-matches route escaped-uri)]
+      [route (map #(apply str (replace {\- \.} %)) (vals match))])))
 
 (defn append-slash
   "Appends a forward slash to the end of the string

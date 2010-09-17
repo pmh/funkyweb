@@ -6,7 +6,7 @@
   (are [key] (not (nil? (key route-map)))
        :get :put :post :delete))
 
-(deftest test-strip-type-hints
+(deftest test-strip-type-hints-ints
   (are [args-list expected]
        (= (strip-type-hints args-list))
        [:int 'a :int 'b :int 'c] ['a 'b 'c]
@@ -15,12 +15,57 @@
        ['a 'b :int 'c]           ['a 'b 'c]
        ['a 'b 'c]                ['a 'b 'c]))
 
-(deftest test-cast-hinted-args
+(deftest test-strip-type-hints-floats
+  (are [args-list expected]
+       (= (strip-type-hints args-list))
+       [:float 'a :float 'b :float 'c] ['a 'b 'c]
+       ['a :float 'b :float 'c]        ['a 'b 'c]
+       [:float 'a :float 'b 'c]        ['a 'b 'c]
+       ['a 'b :float 'c]               ['a 'b 'c]
+       ['a 'b 'c]                      ['a 'b 'c]))
+
+(deftest test-strip-type-hints-doubles
+  (are [args-list expected]
+       (= (strip-type-hints args-list))
+       [:double 'a :double 'b :double 'c] ['a 'b 'c]
+       ['a :double 'b :double 'c]         ['a 'b 'c]
+       [:int 'a :double 'b 'c]            ['a 'b 'c]
+       ['a 'b :double 'c]                 ['a 'b 'c]
+       ['a 'b 'c]                         ['a 'b 'c]))
+
+(deftest test-strip-type-hints-multiple
+  (are [args-list expected]
+       (= (strip-type-hints args-list))
+       [:int 'a :float 'b :double 'c] ['a 'b 'c]
+       ['a :int 'b :double 'c]        ['a 'b 'c]
+       [:double 'a :float 'b 'c]      ['a 'b 'c]))
+
+(deftest test-cast-hinted-args-ints
   (are [args-list values expected]
        (= (cast-hinted-args args-list values) expected)
        [:int 'a :int 'b]    ["1" "2"]     [1 2]
        [:int 'a :int 'b 'c] ["1" "2" "3"] [1 2 "3"]
        ['a 'b 'c]           ["1" "2" "3"] ["1" "2" "3"]))
+
+(deftest test-cast-hinted-args-floats
+  (are [args-list values expected]
+       (= (cast-hinted-args args-list values) expected)
+       [:float 'a :float 'b]    ["5.01" "0.32"] [(Float/parseFloat "5.01")
+                                                 (Float/parseFloat "0.32")]
+       [:float 'a :float 'b 'c] ["1" "1.2" "4.03"] [(Float/parseFloat "1")
+                                                    (Float/parseFloat "1.2")
+                                                    "4.03"]
+       ['a 'b 'c]               ["1" "2" "3"]      ["1" "2" "3"]))
+
+(deftest test-cast-hinted-args-doubles
+  (are [args-list values expected]
+       (= (cast-hinted-args args-list values) expected)
+       [:double 'a :double 'b]    ["5.01" "0.32"]    [(Double/parseDouble "5.01")
+                                                      (Double/parseDouble "0.32")]
+       [:double 'a :double 'b 'c] ["1" "1.2" "4.03"] [(Double/parseDouble "1")
+                                                      (Double/parseDouble "1.2")
+                                                      "4.03"]
+       ['a 'b 'c]                 ["1" "2" "3"]      ["1" "2" "3"]))
 
 (deftest test-add-route
   (are [method name args action]
