@@ -48,10 +48,10 @@
 (defn build-route
   "Builds a route from the name and args
   
-  (binding [*ns* (create-ns 'myapp.controllers.foo)]
+  (binding [*controller-name* \"foo\"]
     (build-route 'show [])) ;=> /foo/show
   
-  (binding [*ns* (create-ns 'myapp.controllers.foo)]
+  (binding [*controller-name* \"foo\"]
     (build-route 'show '[bar baz])) ;=> /foo/show/:bar/:baz"
   [name args]
   (let [keyworded-args (into [] (map keyword (filter #(not (= "*" %)) args)))]
@@ -60,10 +60,10 @@
 (defn build-path
   "Builds a path from the name and args
   
-  (binding [*ns* (create-ns 'myapp.controllers.foo)]
+  (binding [*controller-name* \"foo\"]
     (build-path 'show [])) ;=> /foo/show
   
-  (binding [*ns* (create-ns 'myapp.controllers.foo)]
+  (binding [*controller-name* \"foo\"]
     (build-path 'show [1 2])) ;=> /foo/show/1/2"
   [name args]
   (build-uri name args))
