@@ -5,13 +5,16 @@
 (deftest test-handler-with-existing-route
   (binding [funkyweb.controller.router/execute (fn [_] str "foo")]
     (is (= (handler {:request-method :get :uri "/dashboard/foobar"})
-           {:status 200, :headers {"Content-Type" "text/html"}, :body "foo"}))))
+           {:session nil
+            :status 200,
+            :headers {"Content-Type" "text/html"},
+            :body "foo"}))))
 
 (deftest test-handler-with-nonexisting-route
-  (is (= (handler {:request-method :get :uri "/dashboard/foobar"})
-         {:status 404,
-          :headers {"Content-Type" "text/html"},
-          :body "404 - not found"})))
+  (let [resp (handler {:request-method :get :uri "/dashboard/foobar"})]
+    (is (= (resp :status) 404))
+    (is (= (get (resp :headers) "Content-Type") "text/html"))
+    (is (= (resp :body) "404 - not found"))))
 
 (deftest test-server-with-adapter-fn
   (is (= (server (fn [_ options] options))
@@ -20,3 +23,13 @@
 (deftest test-server-with-adapter-fn-options
   (is (= (server (fn [_ options] options) {:port 9090 :join? true})
          {:port 9090 :join? true})))
+
+(deftest test-handler-resets-session
+  (binding [funkyweb.session/*session* (ref {:foo "bar"})]
+    (handler {:request-method :get :uri "/dashboard/foo"})
+    (is (= @funkyweb.session/*session* {}))))
+
+(deftest test-handler-resets-session-from-request
+  (binding [funkyweb.session/*session* (ref {:foo "bar"})]
+    (handler {:request-method :get :uri "/dashboard/foo" :session {:bar "baz"}})
+    (is (= @funkyweb.session/*session* {:bar "baz"}))))

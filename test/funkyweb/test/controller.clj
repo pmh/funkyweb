@@ -52,7 +52,8 @@
       (binding [funkyweb.controller.router/error-map error-map]
         (is (= (handler {:request-method :get
                          :uri "/dashboard/add/1/foo"})
-               {:status 404,
+               {:session nil
+                :status 404,
                 :headers {"Content-Type" "text/html"},
                 :body "404 - Not found"}))))
     
@@ -69,6 +70,7 @@
     (deftest test-invalid-route-returns-404-message
       (binding [funkyweb.controller.router/error-map error-map]
         (is (= (handler {:request-method :get :uri "/im/a/404"})
-               {:status 404,
+               {:session nil
+                :status 404,
                 :headers {"Content-Type" "text/html"},
                 :body "404 - Not found"}))))))

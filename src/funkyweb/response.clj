@@ -1,5 +1,6 @@
 (ns funkyweb.response
-  (:use funkyweb.controller.router))
+  (:use funkyweb.controller.router
+        funkyweb.session))
 
 (defn generate-response
   ([status]
@@ -7,9 +8,8 @@
   ([status body]
      (generate-response status {"Content-Type" "text/html"} body))
   ([status headers body]
-     {:status  status
-      :headers headers
-      :body    body}))
+     (merge {:status status :headers headers :body body}
+            {:session @*session*})))
 
 (defmulti render (fn [[_ x]] (type x)))
 
