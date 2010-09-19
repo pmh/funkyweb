@@ -70,7 +70,7 @@
 (deftest test-add-route
   (are [method name args action]
        (do
-         (binding [*controller-name* "dashboard"]
+         (binding [*controller-name* "/dashboard"]
            (add-route method name args action)
            (= @(method route-map) {"/dashboard/foo/:bar/" {:action    action
                                                            :args-list args}})))
@@ -94,7 +94,7 @@
 
 (deftest test-build-route
   (are [name args expected]
-       (binding [*controller-name* "dashboard"]
+       (binding [*controller-name* "/dashboard"]
          (= (build-route name args) expected))
        'foo []          "/dashboard/foo/"
        'foo [:bar]      "/dashboard/foo/:bar/"
@@ -102,7 +102,7 @@
 
 (deftest test-build-path
   (are [name args expected]
-       (binding [*controller-name* "dashboard"]
+       (binding [*controller-name* "/dashboard"]
          (= (build-path name args) expected))
        'bar []      "/dashboard/bar"
        'foo [10]    "/dashboard/foo/10"

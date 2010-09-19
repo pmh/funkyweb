@@ -74,3 +74,17 @@
                 :status 404,
                 :headers {"Content-Type" "text/html"},
                 :body "404 - Not found"}))))))
+
+(defcontroller blog->:id->posts
+
+  (GET show [id post_id]
+    (str "blog_id: " id " post_id: " post_id))
+
+    
+  (let [route-map funkyweb.controller.router/route-map
+        error-map funkyweb.controller.router/error-map]
+
+    (deftest test-nested-controller-works
+      (binding [funkyweb.controller.router/route-map route-map]
+        (is (= (execute :get "/blog/10/posts/show/20")
+               (str "blog_id: " 10 " post_id: " 20)))))))

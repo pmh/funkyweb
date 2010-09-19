@@ -49,7 +49,7 @@
       ret)))
 
 (defn- build-uri [name args]
-  (let [base (str "/" *controller-name* "/" name)]
+  (let [base (str *controller-name* "/" name)]
     (if (seq args)
       (str base "/" (str-join "/" args))
       (str base))))
@@ -63,8 +63,11 @@
   (binding [*controller-name* \"foo\"]
     (build-route 'show '[bar baz])) ;=> /foo/show/:bar/:baz"
   [name args]
-  (let [keyworded-args (into [] (map keyword (filter #(not (= "*" %)) args)))]
-    (build-uri name (conj keyworded-args (first (filter #(= "*" %) args))))))
+  (let [keyworded-args (map keyword (filter #(not (= "*" %)) args))
+        non-base-args  (into []
+                             (filter #(not (.contains *controller-name* (str %)))
+                                     keyworded-args))]
+    (build-uri name (conj non-base-args (first (filter #(= "*" %) args))))))
 
 (defn build-path
   "Builds a path from the name and args
