@@ -1,5 +1,5 @@
-(ns funkyweb.test.session
-  (:use [funkyweb.session] :reload-all)
+(ns funkyweb.test.helpers.session
+  (:use [funkyweb.helpers.session] :reload-all)
   (:use [clojure.test]))
 
 (deftest test-session-get

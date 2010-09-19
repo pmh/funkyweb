@@ -1,4 +1,4 @@
-(ns funkyweb.session)
+(ns funkyweb.helpers.session)
 
 (declare alter-session)
 

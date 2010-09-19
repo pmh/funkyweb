@@ -1,6 +1,6 @@
 (ns funkyweb.response
   (:use funkyweb.controller.router
-        funkyweb.session))
+        funkyweb.helpers.session))
 
 (defn generate-response
   ([status]

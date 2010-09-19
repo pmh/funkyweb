@@ -1,6 +1,7 @@
 (ns funkyweb.server
   (:use funkyweb.controller.router
-        (funkyweb response session)
+        funkyweb.helpers.session
+        funkyweb.response
         (ring.middleware session cookies)))
 
 (defmacro wrap!

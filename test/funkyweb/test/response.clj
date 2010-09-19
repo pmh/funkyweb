@@ -24,7 +24,7 @@
           :body    "foobar"})))
 
 (deftest test-generate-response-merges-session-state
-  (binding [funkyweb.session/*session* (ref {:foo "bar"})]
+  (binding [funkyweb.helpers.session/*session* (ref {:foo "bar"})]
     (is (= (generate-response 200 {"Content-Type" "text/xml"} "foobar")
        {:session {:foo "bar"}
         :status 200

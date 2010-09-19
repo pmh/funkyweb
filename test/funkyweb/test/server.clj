@@ -25,11 +25,11 @@
          {:port 9090 :join? true})))
 
 (deftest test-handler-resets-session
-  (binding [funkyweb.session/*session* (ref {:foo "bar"})]
+  (binding [funkyweb.helpers.session/*session* (ref {:foo "bar"})]
     (handler {:request-method :get :uri "/dashboard/foo"})
-    (is (= @funkyweb.session/*session* {}))))
+    (is (= @funkyweb.helpers.session/*session* {}))))
 
 (deftest test-handler-resets-session-from-request
-  (binding [funkyweb.session/*session* (ref {:foo "bar"})]
+  (binding [funkyweb.helpers.session/*session* (ref {:foo "bar"})]
     (handler {:request-method :get :uri "/dashboard/foo" :session {:bar "baz"}})
-    (is (= @funkyweb.session/*session* {:bar "baz"}))))
+    (is (= @funkyweb.helpers.session/*session* {:bar "baz"}))))
