@@ -54,8 +54,8 @@
                          :uri "/dashboard/add/1/foo"})
                {:session nil
                 :cookies nil
-                :status 404,
-                :headers {"Content-Type" "text/html"},
+                :status 404
+                :headers {"Content-Type" "text/html"}
                 :body "404 - Not found"}))))
     
     (deftest test-stuff-builds-a-uri
@@ -64,7 +64,7 @@
       (is (= (stuff "foo" "bar") "/dashboard/stuff/foo/bar")))
     (deftest test-stuff-action-method-returns-body
       (binding [funkyweb.controller.router/route-map route-map]
-        (is (= (execute :get "/dashboard/stuff/")         ""))
+        (is (= (execute :get "/dashboard/stuff/")        ""))
         (is (= (execute :get "/dashboard/stuff/foo")     "(\"foo\")"))
         (is (= (execute :get "/dashboard/stuff/foo/bar") "(\"foo\" \"bar\")"))))
     
@@ -75,7 +75,8 @@
                 :cookies nil
                 :status 404,
                 :headers {"Content-Type" "text/html"},
-                :body "404 - Not found"}))))))
+                :body "404 - Not found"}))
+        (funkyweb.helpers.request/restore-request-from {})))))
 
 (defcontroller blog->:id->posts
 

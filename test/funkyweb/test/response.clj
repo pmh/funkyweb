@@ -35,6 +35,16 @@
             :headers {"Content-Type" "text/xml"}
             :body    "foobar"}))))
 
+(deftest test-generate-response-merges-cookies
+  (binding [funkyweb.helpers.cookies/*cookies* (ref {:foo "bar"})]
+    (is (= (generate-response 200 {"Content-Type" "text/xml"} "foobar")
+           {:session nil
+            :cookies {:foo "bar"}
+            :status 200
+            :headers {"Content-Type" "text/xml"}
+            :body    "foobar"}))))
+
+
 (deftest test-render-with-string
   (is (= (render [200 "with string"])
          {:session nil

@@ -1,4 +1,5 @@
-(ns funkyweb.helpers.cookies)
+(ns funkyweb.helpers.cookies
+  (:use [clojure.string :only (split)]))
 
 (declare alter-cookies)
 
@@ -7,8 +8,10 @@
 (defn cookies-get [key]
   (@*cookies* key))
 
-(defn cookies-set [key val & kvs]
-  (apply (partial alter-cookies assoc key val) kvs))
+(defn cookies-set
+  ([key val] (cookies-set key val {}))
+  ([key val options]
+     (alter-cookies assoc key (merge {:value val :path "/"} options))))
 
 (defn alter-cookies
   "Mutates the *cookies* ref with the result of
@@ -23,5 +26,5 @@
   (dosync
    (apply alter *cookies* f args)))
 
-(defn restore-cookies-from [new-value]
-  (dosync (ref-set *cookies* new-value)))
+(defn restore-cookies-from [req]
+  (dosync (ref-set *cookies* (:cookies req))))

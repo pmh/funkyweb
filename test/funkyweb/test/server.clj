@@ -7,8 +7,8 @@
     (is (= (handler {:request-method :get :uri "/dashboard/foobar"})
            {:session nil
             :cookies nil
-            :status 200,
-            :headers {"Content-Type" "text/html"},
+            :status 200
+            :headers {"Content-Type" "text/html"}
             :body "foo"}))))
 
 (deftest test-handler-with-nonexisting-route

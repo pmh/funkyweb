@@ -1,7 +1,7 @@
 (ns funkyweb.server
   (:use funkyweb.controller.router
         funkyweb.response
-        (funkyweb.helpers session cookies)
+        (funkyweb.helpers session cookies request)
         (ring.middleware session cookies)))
 
 (defmacro wrap!
@@ -15,7 +15,8 @@
 
 (defn handler [req]
   (restore-session-from (:session req))
-  (restore-cookies-from (:cookies req))
+  (restore-cookies-from req)
+  (restore-request-from req)
   (try
     (if-let [body (execute req)]
       (render [200 body])
@@ -26,6 +27,5 @@
 (defn server
   ([adapter-fn] (server adapter-fn {}))
   ([adapter-fn options]
-     (do (wrap! (wrap-session)
-                (wrap-cookies))
+     (do (wrap! (wrap-session))
          (adapter-fn handler (merge {:port 8080 :join? false} options)))))
