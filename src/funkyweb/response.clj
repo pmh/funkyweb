@@ -1,6 +1,6 @@
 (ns funkyweb.response
   (:use funkyweb.controller.router
-        funkyweb.helpers.session))
+        (funkyweb.helpers session cookies)))
 
 (defn generate-response
   ([status]
@@ -9,7 +9,8 @@
      (generate-response status {"Content-Type" "text/html"} body))
   ([status headers body]
      (merge {:status status :headers headers :body body}
-            {:session @*session*})))
+            {:session @*session*}
+            {:cookies @*cookies*})))
 
 (defmulti render (fn [[_ x]] (type x)))
 

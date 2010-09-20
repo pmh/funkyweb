@@ -23,5 +23,5 @@
   (dosync
    (apply alter *session* f args)))
 
-(defn reset-session-with [new-value]
+(defn restore-session-from [new-value]
   (dosync (ref-set *session* new-value)))

@@ -1,7 +1,7 @@
 (ns funkyweb.server
   (:use funkyweb.controller.router
-        funkyweb.helpers.session
         funkyweb.response
+        (funkyweb.helpers session cookies)
         (ring.middleware session cookies)))
 
 (defmacro wrap!
@@ -14,7 +14,8 @@
     (constantly (-> handler ~@middlewares))))
 
 (defn handler [req]
-  (reset-session-with (:session req))
+  (restore-session-from (:session req))
+  (restore-cookies-from (:cookies req))
   (try
     (if-let [body (execute req)]
       (render [200 body])

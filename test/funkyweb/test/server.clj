@@ -6,6 +6,7 @@
   (binding [funkyweb.controller.router/execute (fn [_] str "foo")]
     (is (= (handler {:request-method :get :uri "/dashboard/foobar"})
            {:session nil
+            :cookies nil
             :status 200,
             :headers {"Content-Type" "text/html"},
             :body "foo"}))))
