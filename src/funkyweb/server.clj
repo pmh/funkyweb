@@ -14,9 +14,10 @@
     (constantly (-> handler ~@middlewares))))
 
 (defn handler [req]
-  (restore-session-from (:session req))
-  (restore-cookies-from req)
-  (restore-request-from req)
+  (doto req
+    (restore-session-from)
+    (restore-cookies-from)
+    (restore-request-from))
   (try
     (if-let [body (execute req)]
       (render [200 body])
