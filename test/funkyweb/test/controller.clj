@@ -75,8 +75,7 @@
                 :cookies nil
                 :status 404,
                 :headers {"Content-Type" "text/html"},
-                :body "404 - Not found"}))
-        (funkyweb.helpers.request/restore-request-from {})))))
+                :body "404 - Not found"}))))))
 
 (defcontroller blog->:id->posts
 

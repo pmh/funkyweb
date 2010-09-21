@@ -28,3 +28,11 @@
            {:foo "bar" :baz "quux"}))
     (is (= (alter-cookies dissoc :baz)
            {:foo "bar"}))))
+
+(deftest test-restore-cookies-from
+  (restore-cookies-from {:cookies {"foo" "bar"}})
+  (is (= @*cookies* {"foo" "bar"}))
+  (restore-cookies-from {:cookies {}})
+  (is (= @*cookies* {}))
+  (restore-cookies-from {:cookies nil})
+  (is (= @*cookies* nil)))
