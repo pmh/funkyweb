@@ -19,7 +19,7 @@
     (restore-cookies-from)
     (restore-request-from))
   (try
-    (if-let [body (execute req)]
+    (if-let [body (execute @*request*)]
       (render [200 body])
       (render [404 (get @error-map 404)]))
     (catch java.lang.NumberFormatException e

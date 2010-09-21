@@ -13,3 +13,6 @@
 (defalias alter-cookies cookies/alter-cookies)
 
 (defalias request-get   request/request-get)
+(defalias query-string  request/query-string)
+(defalias qs            request/query-string)
+
