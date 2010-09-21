@@ -16,3 +16,9 @@
 (defalias query-string  request/query-string)
 (defalias qs            request/query-string)
 
+(defn respond-with [& {:keys [html xml json]}]
+  (condp = (request-get :content-type)
+      "text/html"        [200 "text/html"        html]
+      "text/xml"         [200 "text/xml"         xml ]
+      "application/json" [200 "application/json" json]
+      [200 "text/html" html]))
