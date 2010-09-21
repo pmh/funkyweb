@@ -1,6 +1,9 @@
 (ns funkyweb.controller.helpers
   (:use funkyweb.controller.router))
 
+(defn controller-name-to-route [name]
+  (apply str (replace {\- "/" \> ""} (str "/" name))))
+
 (defmacro construct-url-helper [name args]
   `(let [ns# *ns*
          controller-name# *controller-name*]

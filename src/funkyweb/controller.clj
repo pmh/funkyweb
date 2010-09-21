@@ -2,9 +2,6 @@
   (:use funkyweb.controller.router
         funkyweb.controller.helpers))
 
-(defn controller-name-to-route [name]
-  (apply str (replace {\- "/" \> ""} (str "/" name))))
-
 (defmacro defcontroller [controller-name & forms]
   `(do (binding [*controller-name* (controller-name-to-route '~controller-name)]
          ~@forms)
