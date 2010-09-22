@@ -1,5 +1,7 @@
 # funkyweb
 
+NOTE: funkyweb is in WIP and is not production ready
+
 funkyweb is a clojure web framework with route inference. It uses the
 name of the controller and actions to generate routes and url helpers.
 
@@ -12,7 +14,7 @@ followed by any number of actions.
     (defcontroller dashboard
       ... actions ...)
 
-Controllers can also nest controllers using ->
+Controllers can also be nested using ->
 
     ; generates the base route /blog/posts
     (defcontroller blog->posts
@@ -26,7 +28,8 @@ And they can contain dynamic parts
 
 ### Actions
 
-Actions are defined using the GET PUT POST or DELETE macros and
+Actions are defined using the GET PUT POST or DELETE macros (though
+only GET is supported at the moment, the rest are coming soon) and
 normally reside within a controller
 
     (defcontroller dashboard
@@ -38,7 +41,7 @@ normally reside within a controller
 but can be standalone as well
 
     ; generates the route /index
-    (GET index
+    (GET index []
       "This is the index")
 
 Actions can also take arguments passed in as url parameters
@@ -89,6 +92,12 @@ also generated which when called returns the url for the action
 
     (show 10) ;=> /show/10
 
+These functions also take an optional map of query-string parameters
+
+    (GET show [id] (str "id: " id))
+    
+    (show 10 {:foo "bar"}) ;=> /show/10?foo=bar
+
 What you return from an action controls what the response will look
 like.
 
@@ -100,7 +109,7 @@ and the content-type set to text/html
        "foo")
 
 Returning an integer will render a response with the status set to the
-integer you returned and the content-type set to 
+integer you returned and the content-type set to text/html
 
     ; {:status 404 :headers {:content-type "text/html} :body "404 - not found"}
     (GET with-int []
@@ -120,6 +129,15 @@ Returning a map gives you full control over the response
       {:status 200 :headers {:content-type "text/html} :body "foo"})
 
 
+The error function let's you create custom error handlers, it takes a
+status code and a body
+
+    (error 404
+      "404 - not found")
+
+    (error 500
+      "500 - internal server error")
+
 ### Helpers
 
 The helpers namespace contains aliases to the request, cookies and
@@ -138,6 +156,16 @@ respond-with let's your actions return different content based on the url
                     :xml  "<response>xml</response>"
                     :json "\"response\" : \"json\""
 
+redirect-to takes either a string or a url generating function
+
+    (GET say-hello [name] (str "Hello, " name "!"))
+
+    ; Redirects the user to /say-hello/foo
+    (redirect-to say-hello "foo")
+    
+    ; Redirects the user to http://google.se
+    (redirect-to "http://google.se")
+
 #### Request
 
 request-get
@@ -150,7 +178,7 @@ request-get
 query-string, qs
 
     ; GET /index?foo=bar
-    ;  => foo = bar 
+    ;  => foo = bar
     (GET index []
       (str "foo = " (query-string :foo)))
 
@@ -169,7 +197,7 @@ cookies-get
 
     (cookies-get :foo)
 
-alter-cookies 
+alter-cookies
  - takes a function and any number of arguments
 
     (alter-cookies dissoc :foo)
@@ -191,7 +219,7 @@ alter-session
  - takes a function and any number of arguments
 
     (alter-session dissoc :foo)
-    (alter-session assoc :foo {:value "bar" :path "/"})
+    (alter-session assoc :foo "bar")
 
 ## Server
 
@@ -218,7 +246,7 @@ server
         (str "Hello, " name "!"))
 
       (GET hello-world []
-        (str "<a href='" (say-hello "world") "'>Hello, world!</a>")))
+        (helpers/redirect-to say-hello "world")))
 
 
     (server/server run-jetty)
