@@ -19,3 +19,11 @@
             (ref {:content-type nil})]
     (is (= (respond-with :html "html" :xml "xml" :json "json")
            [200 "text/html" "html"]))))
+
+(deftest test-redirect-to
+  (is (= (redirect-to (fn [x] (str "/" x)) "foo"))
+      {:status 301 :headers {"Location" "/foo"}
+       :body "You are being redirected to: /foo"})
+  (is (= (redirect-to "http://google.se"))
+      {:status 301 :headers {"Location" "http://google.se"}
+       :body "You are being redirected to: http://goolge.se"}))

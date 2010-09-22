@@ -16,6 +16,12 @@
 (defalias query-string  request/query-string)
 (defalias qs            request/query-string)
 
+(defn redirect-to [f & args]
+  (let [uri (if (string? f) f (apply f args))]
+    {:status 301
+     :headers {"Location" uri}
+     :body (str "You are being redirected to: " uri)}))
+
 (defn respond-with [& {:keys [html xml json]}]
   (condp = (request-get :content-type)
       "text/html"        [200 "text/html"        html]
