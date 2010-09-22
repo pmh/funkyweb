@@ -104,9 +104,12 @@
   (are [name args expected]
        (binding [*controller-name* "/dashboard"]
          (= (build-path name args) expected))
-       'bar []      "/dashboard/bar"
-       'foo [10]    "/dashboard/foo/10"
-       'foo [10 20] "/dashboard/foo/10/20"))
+       'bar []                   "/dashboard/bar"
+       'foo [10]                 "/dashboard/foo/10"
+       'foo [10 20]              "/dashboard/foo/10/20"
+       'foo [{:foo "bar"}]       "/dashboard/foo?foo=bar"
+       'foo [10 {:foo "bar"}]    "/dashboard/foo/10?foo=bar"
+       'foo [10 20 {:foo "bar"}] "/dashboard/foo/10/20?foo=bar"))
 
 (deftest test-match-route
   (are [uri route expected]

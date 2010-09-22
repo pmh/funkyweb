@@ -24,27 +24,31 @@
         error-map funkyweb.controller.router/error-map]
 
     (deftest test-no-params-builds-a-uri
-      (is (= (no-params) "/dashboard/no-params")))
+      (is (= (no-params) "/dashboard/no-params"))
+      (is (= (no-params {:foo "bar"}) "/dashboard/no-params?foo=bar")))
     (deftest test-no-params-action-method-returns-body
       (binding [funkyweb.controller.router/route-map route-map]
         (is (= (execute :get "/dashboard/no-params")
                "dashboard#no-params"))))
     
     (deftest test-say-hello-builds-a-uri
-      (is (= (say-hello "foo") "/dashboard/say-hello/foo")))
+      (is (= (say-hello "foo") "/dashboard/say-hello/foo"))
+      (is (= (say-hello "foo" {:foo "bar"}) "/dashboard/say-hello/foo?foo=bar")))
     (deftest test-say-hello-action-method-returns-body
       (binding [funkyweb.controller.router/route-map route-map]
         (is (= (execute :get "/dashboard/say-hello/foo") "Hello, foo!"))))
     
     (deftest test-hello-foo-builds-a-uri
-      (is (= (hello-foo) "/dashboard/hello-foo")))
+      (is (= (hello-foo) "/dashboard/hello-foo"))
+      (is (= (hello-foo {:foo "bar"}) "/dashboard/hello-foo?foo=bar")))
     (deftest test-hello-foo-action-method-returns-body
       (binding [funkyweb.controller.router/route-map route-map]
         (is (= (execute :get "/dashboard/hello-foo")
                "<a href='/dashboard/say-hello/foo'>Say hello to foo</a>"))))
     
     (deftest test-add-builds-a-uri
-      (is (= (add 1 2) "/dashboard/add/1/2")))
+      (is (= (add 1 2) "/dashboard/add/1/2"))
+      (is (= (add 1 2 {:foo "bar"}) "/dashboard/add/1/2?foo=bar")))
     (deftest test-add-action-method-returns-body
       (binding [funkyweb.controller.router/route-map route-map]
         (is (= (execute :get "/dashboard/add/1/2") "1 + 2 = 3"))))
@@ -59,9 +63,12 @@
                 :body "404 - Not found"}))))
     
     (deftest test-stuff-builds-a-uri
-      (is (= (stuff)             "/dashboard/stuff/"))
-      (is (= (stuff "foo")       "/dashboard/stuff/foo"))
-      (is (= (stuff "foo" "bar") "/dashboard/stuff/foo/bar")))
+      (is (= (stuff)                     "/dashboard/stuff"))
+      (is (= (stuff "foo")               "/dashboard/stuff/foo"))
+      (is (= (stuff "foo" {:foo "bar"})  "/dashboard/stuff/foo?foo=bar"))
+      (is (= (stuff "foo" "bar")         "/dashboard/stuff/foo/bar"))
+      (is (= (stuff "foo" "bar" {:foo "bar"})
+             "/dashboard/stuff/foo/bar?foo=bar")))
     (deftest test-stuff-action-method-returns-body
       (binding [funkyweb.controller.router/route-map route-map]
         (is (= (execute :get "/dashboard/stuff/")        ""))

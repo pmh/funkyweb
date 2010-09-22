@@ -8,12 +8,12 @@
 (defmacro construct-url-helper [name args]
   `(let [controller-name# *controller-name*]
      (def ~name
-          (fn [~@(strip-type-hints args)]
+          (fn [& args#]
             (binding [*controller-name* controller-name#]
               (let [& "&"]
                 (build-path '~name
                             (flatten
-                             (strip-type-hints (filter #(not (= "&" %)) ~args))))))))))
+                             (strip-type-hints (filter #(not (= "&" %)) args#))))))))))
 
 (defmacro construct-route [http-verb name args forms]
   `(add-route ~http-verb '~name (replace-varargs-with-star '~args)

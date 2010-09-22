@@ -1,5 +1,6 @@
 (ns funkyweb.helpers.request
-  (:use ring.util.codec))
+  (:use ring.util.codec
+        [clojure.string :only (join)]))
 
 (declare alter-request qs-to-map)
 
@@ -25,6 +26,11 @@
                      (url-decode (second %))]))
          (into {})))
     {}))
+
+(defn map-to-qs [m]
+  (-> m vec
+      (->> (map (fn [[k v]] (str (name k) "=" (url-encode v))))
+           (join "&"))))
 
 (defn resolve-content-type [req]
   (let [uri-vec      (-> (req :uri) (clojure.string/split #"\."))

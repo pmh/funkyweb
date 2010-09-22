@@ -1,6 +1,7 @@
 (ns funkyweb.controller.router
   (:use [clojure.contrib.str-utils]
         [funkyweb.str-utils]
+        [funkyweb.helpers.request :only (map-to-qs)]
         [clout.core]))
 
 (def *controller-name* nil)
@@ -75,10 +76,16 @@
   (binding [*controller-name* \"foo\"]
     (build-path 'show [])) ;=> /foo/show
   
-  (binding [*controller-name* \"foo\"]
-    (build-path 'show [1 2])) ;=> /foo/show/1/2"
+  (build-path 'show [1 2]) ;=> /show/1/2
+
+  (build-path 'show [1 2 {:foo \"bar\"}])
+      ;=> /show/1/2?foo=bar"
   [name args]
-  (build-uri name args))
+  (let [partial-uri (partial build-uri name)]
+    (if (map? (last args))
+      (str (partial-uri (butlast args)) "?"
+           (map-to-qs   (last args)))
+      (partial-uri args))))
 
 (defn add-route
   "Looks up method in the route-map, associates

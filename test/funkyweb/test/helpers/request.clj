@@ -16,7 +16,16 @@
   (is (= (qs-to-map "") {}))
   (is (= (qs-to-map "a=b") {:a "b"}))
   (is (= (qs-to-map "a=b&c=d") {:a "b" :c "d"}))
-  (is (= (qs-to-map "a=b&c=d&e=f") {:a "b" :c "d" :e "f"})))
+  (is (= (qs-to-map "a=b&c=d&e=f") {:a "b" :c "d" :e "f"}))
+  (is (= (qs-to-map "foo=foo+bar") {:foo "foo bar"}))
+  (is (= (qs-to-map "foo=foo%20bar") {:foo "foo bar"})))
+
+(deftest test-map-to-qs
+  (is (= (map-to-qs {}) ""))
+  (is (= (map-to-qs {:a "b"}) "a=b"))
+  (is (= (map-to-qs {:a "b" :c "d"}) "a=b&c=d"))
+  (is (= (map-to-qs {:a "b" :c "d" :e "f"}) "a=b&c=d&e=f"))
+  (is (= (map-to-qs {:foo "foo bar"}) "foo=foo+bar")))
 
 (deftest test-resolve-content-type
   (is (= (resolve-content-type {:uri "/foo" :content-type nil})
