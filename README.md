@@ -154,7 +154,7 @@ respond-with let's your actions return different content based on the url
     (GET index []
       (respond-with :html "<h1>HTML</h1>"
                     :xml  "<response>xml</response>"
-                    :json "\"response\" : \"json\""
+                    :json "{\"response\" : \"json\"}"
 
 redirect-to takes either a string or a url generating function
 
