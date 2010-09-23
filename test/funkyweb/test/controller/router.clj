@@ -126,6 +126,13 @@
        "foo/bar"  "foo/bar/"
        "foo/bar/" "foo/bar/"))
 
+(deftest test-parse-form-params
+  (binding [slurp identity]
+    (is (= (parse-form-params {:body ""}) ""))
+    (is (= (parse-form-params {:body "a=b"}) "b"))
+    (is (= (parse-form-params {:body "a=b&c=d"}) "b/d"))
+    (is (= (parse-form-params {:body "a=b&c=d&e=f"}) "b/d/f"))))
+
 (deftest test-parse-args-list
   (are [args expected]
        (= (parse-args-list args) expected)

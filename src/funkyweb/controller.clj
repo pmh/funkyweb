@@ -12,5 +12,10 @@
      (construct-url-helper ~name ~args)
      (construct-route :get ~name ~args ~forms)))
 
+(defmacro POST [name args & forms]
+  `(do
+     (construct-url-helper ~name ~args)
+     (construct-route :post ~name ~args ~forms)))
+
 (defn error [status-code body]
   (add-error-handler status-code body))

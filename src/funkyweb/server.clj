@@ -2,7 +2,7 @@
   (:use funkyweb.controller.router
         funkyweb.response
         (funkyweb.helpers session cookies request)
-        (ring.middleware session cookies)))
+        (ring.middleware session cookies params)))
 
 (defmacro wrap!
   "Lets you specify the middlewares you want to use.
@@ -28,5 +28,6 @@
 (defn server
   ([adapter-fn] (server adapter-fn {}))
   ([adapter-fn options]
-     (do (wrap! (wrap-session))
+     (do (wrap! (wrap-session)
+                #_(wrap-params))
          (adapter-fn handler (merge {:port 8080 :join? false} options)))))

@@ -18,6 +18,12 @@
 
   (GET stuff [& stuff] (str stuff))
 
+  (POST no-params-post []
+    "dashboard#no-params-post")
+
+  (POST with-params-post [param]
+    param)
+  
   (error 404 "404 - Not found")
   
   (let [route-map funkyweb.controller.router/route-map
@@ -82,7 +88,12 @@
                 :cookies nil
                 :status 404,
                 :headers {"Content-Type" "text/html"},
-                :body "404 - Not found"}))))))
+                :body "404 - Not found"}))))
+
+    (deftest test-post
+      (is (= (no-params-post) "/dashboard/no-params-post"))
+      (is (= (with-params-post) "/dashboard/with-params-post"))
+      (is (= (with-params-post "foo") "/dashboard/with-params-post/foo")))))
 
 (defcontroller blog->:id->posts
 

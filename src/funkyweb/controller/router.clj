@@ -131,6 +131,16 @@
     s
     (str s "/")))
 
+(defn parse-form-params [req]
+  (try
+    (-> (slurp (:body req))
+      (.split "&")
+      (->> (map #(vec (.split % "=")))
+           (map second)
+           (apply str)
+           (-> (interpose "/"))))
+    (catch Exception e "")))
+
 (defn parse-args-list
   "Variadic arguments are passed in as a string with the
   arguments separated by slashes (/). This functions turns
@@ -172,7 +182,8 @@
   if one is found or nil otherwise"
   [req]
   (let [method       (:request-method req)
-        uri          (append-slash (:uri req))
+        form-params  (parse-form-params req)
+        uri          (str (append-slash (str (:uri req))) form-params)
         [route args] (some (partial match-route uri) (keys @(method route-map)))]
     (if-let [match (get @(method route-map) route)]
       (let [type-casted-args (cast-hinted-args (:args-list match) (reverse args))]
