@@ -4,8 +4,13 @@
 
 (defcontroller dashboard
 
-  (defn execute [method uri]
-    (funkyweb.controller.router/execute {:request-method method :uri uri :body ""}))
+  (defn execute
+    ([method uri] (execute method uri ""))
+    ([method uri body]
+       (binding [slurp identity]
+         (funkyweb.controller.router/execute {:request-method method
+                                              :uri uri
+                                              :body body}))))
 
   (GET no-params [] "dashboard#no-params")
 
@@ -22,6 +27,18 @@
     "dashboard#no-params-post")
 
   (POST with-params-post [param]
+    param)
+
+  (PUT no-params-put []
+    "dashboard#no-params-put")
+
+  (PUT with-params-put [param]
+    param)
+  
+  (DELETE no-params-delete []
+    "dashboard#no-params-delete")
+
+  (DELETE with-params-delete [param]
     param)
   
   (error 404 "404 - Not found")
@@ -91,10 +108,35 @@
                 :headers {"Content-Type" "text/html"},
                 :body "404 - Not found"}))))
 
-    (deftest test-post
+    (deftest test-post-url-helper
       (is (= (no-params-post) "/dashboard/no-params-post"))
       (is (= (with-params-post) "/dashboard/with-params-post"))
-      (is (= (with-params-post "foo") "/dashboard/with-params-post/foo")))))
+      (is (= (with-params-post "foo") "/dashboard/with-params-post/foo")))
+    (deftest test-post-action-method-returns-body
+      (binding [funkyweb.controller.router/route-map route-map]
+        (is (= (execute :post "/dashboard/no-params-post/")
+               "dashboard#no-params-post"))
+        (is (= (execute :post "/dashboard/with-params-post/foo") "foo"))))
+
+    (deftest test-put-url-helper
+      (is (= (no-params-put) "/dashboard/no-params-put"))
+      (is (= (with-params-put) "/dashboard/with-params-put"))
+      (is (= (with-params-put "foo") "/dashboard/with-params-put/foo")))
+    (deftest test-put-action-method-returns-body
+      (binding [funkyweb.controller.router/route-map route-map]
+        (is (= (execute :put "/dashboard/no-params-put/")
+               "dashboard#no-params-put"))
+        (is (= (execute :put "/dashboard/with-params-put/foo") "foo"))))
+
+    (deftest test-delete-url-helper
+      (is (= (no-params-delete) "/dashboard/no-params-delete"))
+      (is (= (with-params-delete) "/dashboard/with-params-delete"))
+      (is (= (with-params-delete "foo") "/dashboard/with-params-delete/foo")))
+    (deftest test-delete-action-method-returns-body
+      (binding [funkyweb.controller.router/route-map route-map]
+        (is (= (execute :delete "/dashboard/no-params-delete/")
+               "dashboard#no-params-delete"))
+        (is (= (execute :delete "/dashboard/with-params-delete/foo") "foo"))))))
 
 (defcontroller blog->:id->posts
 
