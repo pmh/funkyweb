@@ -132,14 +132,14 @@
     (str s "/")))
 
 (defn parse-form-params [req]
-  (try
-    (-> (slurp (:body req))
+  (-> (:body req)
       (.split "&")
       (->> (map #(vec (.split % "=")))
-           (map second)
-           (apply str)
-           (-> (interpose "/"))))
-    (catch Exception e "")))
+           (filter #(not (= (first %) "_method")))
+           (map #(vector (second %)))
+           (flatten)
+           (interpose "/")
+           (apply str))))
 
 (defn parse-args-list
   "Variadic arguments are passed in as a string with the
@@ -175,13 +175,28 @@
         ret))
     args))
 
+(defn extract-method [req]
+  (try
+    (let [method (-> (:body req)
+                     (.split "&")
+                     (->> (map #(vec (.split % "=")))
+                          (filter #(= (first %) "_method"))
+                          (flatten)
+                          (second)
+                          (keyword)))]
+      (or method (:request-method req)))
+    (catch Exception e
+      (:request-method req))))
+
 (defn execute
   "Extracts the request-method and uri from the request
   and tries to find a route matching that signature.
   Returns either the result of executing the action
   if one is found or nil otherwise"
   [req]
-  (let [method       (:request-method req)
+  (let [req          (try (merge req {:body (slurp (:body req))})
+                          (catch Exception e req))
+        method       (extract-method req)
         form-params  (parse-form-params req)
         uri          (str (append-slash (str (:uri req))) form-params)
         [route args] (some (partial match-route uri) (keys @(method route-map)))]

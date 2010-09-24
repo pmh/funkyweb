@@ -131,7 +131,8 @@
     (is (= (parse-form-params {:body ""}) ""))
     (is (= (parse-form-params {:body "a=b"}) "b"))
     (is (= (parse-form-params {:body "a=b&c=d"}) "b/d"))
-    (is (= (parse-form-params {:body "a=b&c=d&e=f"}) "b/d/f"))))
+    (is (= (parse-form-params {:body "a=b&c=d&e=f"}) "b/d/f"))
+    (is (= (parse-form-params {:body "_method=post"}) ""))))
 
 (deftest test-parse-args-list
   (are [args expected]
@@ -150,8 +151,8 @@
        (binding [deref (fn [_] {"/show/:id/" {:action    (fn [id] id)
                                              :args-list ['id]}})]
          (= (execute req) expected))
-       {:request-method :get :uri "/show/10/"} "10"
-       {:request-method :get :uri "/foo/"}     nil))
+       {:request-method :get :uri "/show/10/" :body ""} "10"
+       {:request-method :get :uri "/foo/"     :body ""} nil))
 
 (deftest test-execute-raises
   (are [req expected]

@@ -5,7 +5,7 @@
 (defcontroller dashboard
 
   (defn execute [method uri]
-    (funkyweb.controller.router/execute {:request-method method :uri uri}))
+    (funkyweb.controller.router/execute {:request-method method :uri uri :body ""}))
 
   (GET no-params [] "dashboard#no-params")
 
@@ -61,7 +61,8 @@
     (deftest test-add-action-method-returns-404-for-non-numeric-routes
       (binding [funkyweb.controller.router/error-map error-map]
         (is (= (handler {:request-method :get
-                         :uri "/dashboard/add/1/foo"})
+                         :uri "/dashboard/add/1/foo"
+                         :body ""})
                {:session nil
                 :cookies nil
                 :status 404
@@ -83,7 +84,7 @@
     
     (deftest test-invalid-route-returns-404-message
       (binding [funkyweb.controller.router/error-map error-map]
-        (is (= (handler {:request-method :get :uri "/im/a/404"})
+        (is (= (handler {:request-method :get :uri "/im/a/404" :body ""})
                {:session nil
                 :cookies nil
                 :status 404,
