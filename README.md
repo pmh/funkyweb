@@ -28,8 +28,7 @@ And they can contain dynamic parts
 
 ### Actions
 
-Actions are defined using the GET PUT POST or DELETE macros (though
-only GET is supported at the moment, the rest are coming soon) and
+Actions are defined using the GET PUT POST or DELETE macros and
 normally reside within a controller
 
     (defcontroller dashboard
@@ -44,45 +43,97 @@ but can be standalone as well
     (GET index []
       "This is the index")
 
-Actions can also take arguments passed in as url parameters
 
-    (defcontroller dashboard
+#### GET
 
-      ; generates the route /dashboard/show/:id
-      ; GET /dashboard/show/10 
-      ;  => showing product with id: 10
-      (GET show [id]
-        (str "showing product with id: " id))
+Actions defined with the GET macro responds to HTTP GET requests
 
-There is also support for variadic arguments
+    ; curl http://localhost:8080/index 
+    ;  => this is the index action
+    (GET index [] "this is the index action")
 
-    (defcontroller dashboard
+    ; curl http://localhost:8080/say-hello/foo 
+    ;  => Hello, foo!
+    (GET say-hello [name] (str "Hello, " name "!"))
 
-      ; generates the route /dashboard/numbers/:id/*
-      ; GET /dashboard/numbers/10
-      ;  => first number: 10 more: 
-      ; GET /dashboard/numbers/10/20/30
-      ;  => first number: 10 more: (20 30)
-      (GET numbers [first-number & more]
-        (str "first number: " first-number " more: " more))
+#### POST
 
-And type hints (by using type hints funkyweb converts the parameters
-for you before your action is called and will return a 404 if the
-parameters don't match their specified types)
+Actions defined with the POST macro responds to HTTP POST requests
+
+    ; curl -d "" http://localhost:8080/index 
+    ;  => this is the index action
+    (POST index [] "this is the index action")
+
+    ; curl -d "name=foo" http://localhost:8080/say-hello
+    ;  => Hello, foo!
+    (POST say-hello [name] (str "Hello, " name "!"))
+    
+    ; curl -d "" http://localhost:8080/say-hello/foo
+    ;  => Hello, foo!
+    (POST say-hello [name] (str "Hello, " name "!"))
+    
+
+#### PUT
+
+Actions defined with the PUT macro responds to HTTP PUT requests,
+either real PUT's or fake ones with the _method hack.
+
+    ; curl -d "_method=put" http://localhost:8080/index
+    ;  => this is the index action
+    (PUT index [] "this is the index action")
+
+    ; curl -d "name=foo" -d "_method=put" http://localhost:8080/say-hello
+    ;  => Hello, foo!
+    (PUT say-hello [name] (str "Hello, " name "!"))
+
+    ; curl -d "_method=put" http://localhost:8080/say-hello/foo
+    ;  => Hello, foo!
+    (PUT say-hello [name] (str "Hello, " name "!"))
+
+#### DELETE
+
+Actions defined with the PUT macro responds to HTTP PUT requests,
+either real PUT's or fake ones with the _method hack.
+
+    ; curl -d "_method=delete" http://localhost:8080/index 
+    ;  => this is the index action
+    (DELETE index [] "this is the index action")
+
+    ; curl -d "name=foo" -d "_method=delete" http://localhost:8080/say-hello 
+    ;  => Hello, foo!
+    (DELETE say-hello [name] (str "Hello, " name "!"))
+
+    ; curl -d "_method=delete" http://localhost:8080/say-hello/foo
+    ;  => Hello, foo!
+    (DELETE say-hello [name] (str "Hello, " name "!"))
+
+#### Variadic arguments
+
+    ; curl http://localhost:8080/numbers/10
+    ;  => first number: 10 more: 
+    ; curl http://localhost:8080/numbers/10/20/30
+    ;  => first number: 10 more: (20 30)
+    (GET numbers [first-number & more]
+      (str "first number: " first-number " more: " more))
+
+#### Type hints 
+
+By using type hints funkyweb converts the parameters for you before your action is called and will return a 404 if the parameters don't match their specified types)
 
     (defcontroller dashboard
       
-      ; generates the route /dashboard/:a/:b/:c
-      ; GET /dashboard/add/foo/2.3/4.6
+      ; curl http://localhost:8080/add/foo/2.3/4.6
       ;  => 404 - not found
-      ; GET /dashboard/add/2.0/2.3/4.6
+      ; curl http://localhost:8080/add/2.0/2.3/4.6
       ;  => 404 - not found
-      ; GET /dashboard/add/2/2.3/4.6
+      ; curl http://localhost:8080/add/2/2.3/4.6
       ;  => 8.900000190734863
-      ; GET /dashboard/add/2/2/4
+      ; curl http://localhost:8080/add/2/2/4
       ;  => 8.0
       (GET add [:int a :float b :double c]
         (str (+ a b c))
+
+#### URL Helpers
 
 When you define an action a function of the same name and arguments is
 also generated which when called returns the url for the action
@@ -98,8 +149,13 @@ These functions also take an optional map of query-string parameters
     
     (show 10 {:foo "bar"}) ;=> /show/10?foo=bar
 
+
+#### Rendering
+
 What you return from an action controls what the response will look
 like.
+
+##### String
 
 Returning a string will render a response with the status set to 200
 and the content-type set to text/html
@@ -108,12 +164,16 @@ and the content-type set to text/html
     (GET with-string []
        "foo")
 
+##### Integer
+
 Returning an integer will render a response with the status set to the
 integer you returned and the content-type set to text/html
 
     ; {:status 404 :headers {:content-type "text/html} :body "404 - not found"}
     (GET with-int []
       404)
+
+##### Vector
 
 Returning a vector of status-code, content-type and body will build a
 response composed of those values
@@ -122,12 +182,15 @@ response composed of those values
     (GET with-vector []
        [200 "text/xml" "foo"]
 
+##### Map
+
 Returning a map gives you full control over the response
 
     ; {:status 200 :headers {:content-type "text/html} :body "foo"}
     (GET with-map []
       {:status 200 :headers {:content-type "text/html} :body "foo"})
 
+#### Custom error handlers
 
 The error function let's you create custom error handlers, it takes a
 status code and a body
