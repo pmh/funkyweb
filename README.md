@@ -1,6 +1,6 @@
 # funkyweb
 
-NOTE: funkyweb is in WIP and is not production ready
+NOTE: funkyweb is WIP and is not production ready
 
 funkyweb is a clojure web framework with route inference. It uses the
 name of the controller and actions to generate routes and url helpers.
@@ -190,7 +190,7 @@ Returning a map gives you full control over the response
     (GET with-map []
       {:status 200 :headers {:content-type "text/html} :body "foo"})
 
-#### Custom error handlers
+### Custom error handlers
 
 The error function let's you create custom error handlers, it takes a
 status code and a body
@@ -245,6 +245,17 @@ query-string, qs
     (GET index []
       (str "foo = " (query-string :foo)))
 
+#### Flash
+
+flash-set
+
+    (GET index [] 
+      (flash-set :notice "this is a notice"))
+
+flash-get
+
+    (GET some-route []
+      (flash-get :notice))
 
 #### Cookies
 
@@ -277,12 +288,6 @@ session-set
 session-get
 
     (session-get :foo)
-
-alter-session 
- - takes a function and any number of arguments
-
-    (alter-session dissoc :foo)
-    (alter-session assoc :foo "bar")
 
 ## Server
 
