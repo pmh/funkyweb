@@ -4,7 +4,9 @@
             [funkyweb.helpers.response :as response]
             [funkyweb.helpers.session  :as session]
             [funkyweb.helpers.cookies  :as cookies]
-            [funkyweb.helpers.flash    :as flash]))
+            [funkyweb.helpers.flash    :as flash]
+            [ring.util.response        :as ring-response]
+            [ring.util.codec           :as ring-codec]))
 
 (defalias request-get   request/request-get)
 (defalias query-string  request/query-string)
@@ -20,6 +22,13 @@
 
 (defalias flash-get     flash/flash-get)
 (defalias flash-set     flash/flash-set)
+
+(defalias file-response     ring-response/file-response)
+(defalias resource-response ring-response/resource-response)
+(defalias url-encode        ring-codec/url-encode)
+(defalias url-decode        ring-codec/url-decode)
+(defalias base64-encode     ring-codec/base64-encode)
+(defalias base64-decode     ring-codec/base64-decode)
 
 (defn redirect-to [f & args]
   (let [uri (if (string? f) f (apply f args))]
