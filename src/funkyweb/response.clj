@@ -8,8 +8,7 @@
   ([status body]
      (generate-response status {"Content-Type" "text/html"} body))
   ([status headers body]
-     (response merge {:status status :headers headers :body body
-                      :cookies @*cookies*})))
+     (response merge {:status status :headers headers :body body})))
 
 (defmulti render (fn [[_ x]] (type x)))
 

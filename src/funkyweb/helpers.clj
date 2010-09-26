@@ -9,7 +9,6 @@
 
 (defalias cookies-set   cookies/cookies-set)
 (defalias cookies-get   cookies/cookies-get)
-(defalias alter-cookies cookies/alter-cookies)
 
 (defalias request-get   request/request-get)
 (defalias query-string  request/query-string)
