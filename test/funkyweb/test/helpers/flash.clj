@@ -9,9 +9,9 @@
     (is (= (flash-set :notice "a notice") {:flash {:notice "a notice"}}))
     (is (= (flash-set :notice "a notice" :warning "a warning")
            {:flash {:notice "a notice" :warning "a warning"}}))
-    (is (= @*response* {:flash {:foo "bar" :baz "quux"}}))))
+    (is (= @*response* {:flash {:notice "a notice" :warning "a warning"}}))))
 
-(deftest test-flash-set
+(deftest test-flash-get
   (binding [*request* (ref {:flash {:notice "a notice"}})]
-    (is (= (flash-get :foo) "a notice"))
+    (is (= (flash-get :notice) "a notice"))
     (is (= (flash-get :bar) nil))))

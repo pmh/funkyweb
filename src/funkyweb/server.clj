@@ -15,7 +15,6 @@
 
 (defn handler [req]
   (doto req
-    (restore-session-from)
     (restore-cookies-from)
     (restore-request-from))
   (reset-response!)

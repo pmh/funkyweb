@@ -5,8 +5,7 @@
 (deftest test-handler-with-existing-route
   (binding [funkyweb.controller.router/execute (fn [_] str "foo")]
     (is (= (handler {:request-method :get :uri "/dashboard/foobar"})
-           {:session nil
-            :cookies nil
+           {:cookies nil
             :status 200
             :headers {"Content-Type" "text/html"}
             :body "foo"}))))
@@ -25,15 +24,9 @@
   (is (= (server (fn [_ options] options) {:port 9090 :join? true})
          {:port 9090 :join? true})))
 
-(deftest test-handler-resets-session
-  (binding [funkyweb.helpers.session/*session* (ref {:foo "bar"})]
-    (handler {:request-method :get :uri "/dashboard/foo" :body ""})
-    (is (= @funkyweb.helpers.session/*session* {}))))
-
-(deftest test-handler-resets-session-from-request
-  (binding [funkyweb.helpers.session/*session* (ref {:foo "bar"})]
+(deftest test-handler-resets-response
+  (binding [funkyweb.helpers.response/*response* (ref {:foo "bar"})]
     (handler {:request-method :get
               :uri "/dashboard/foo"
-              :body ""
-              :session {:bar "baz"}})
-    (is (= @funkyweb.helpers.session/*session* {:bar "baz"}))))
+              :body ""})
+    (is (= @funkyweb.helpers.response/*response* {}))))

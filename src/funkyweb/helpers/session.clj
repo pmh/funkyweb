@@ -1,27 +1,11 @@
-(ns funkyweb.helpers.session)
+(ns funkyweb.helpers.session
+  (:require [funkyweb.helpers.response :as response]
+            [funkyweb.helpers.request  :as request ]))
 
-(declare alter-session)
+(defn session-get [k]
+  (if-let [session (request/request-get :session)]
+    (session k)))
 
-(def *session* (ref {}))
-
-(defn session-get [key]
-  (@*session* key))
-
-(defn session-set [key val & kvs]
-  (apply (partial alter-session assoc key val) kvs))
-
-(defn alter-session
-  "Mutates the *session* ref with the result of
-  applying args to f
-
-  (session assoc :foo \"bar\" :baz \"quux\")
-    ;=> {:foo \"bar\" :baz \"quux\"}
-
-  (session dissoc :baz)
-    ;=> {:foo \"bar\"}"
-  [f & args]
-  (dosync
-   (apply alter *session* f args)))
-
-(defn restore-session-from [req]
-  (dosync (ref-set *session* (:session req))))
+(defn session-set [k v & kvs]
+  (let [kvs-map (into {} (map vec (partition 2 kvs)))]
+    (response/response-set :session (assoc kvs-map k v))))

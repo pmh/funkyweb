@@ -6,7 +6,6 @@
 
 (defalias session-set   session/session-set)
 (defalias session-get   session/session-get)
-(defalias alter-session session/alter-session)
 
 (defalias cookies-set   cookies/cookies-set)
 (defalias cookies-get   cookies/cookies-get)
