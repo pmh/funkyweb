@@ -1,8 +1,16 @@
 (ns funkyweb.helpers
   (:use     [clojure.contrib.def :only (defalias)])
-  (:require [funkyweb.helpers.session :as session]
-            [funkyweb.helpers.cookies :as cookies]
-            [funkyweb.helpers.request :as request]))
+  (:require [funkyweb.helpers.request  :as request]
+            [funkyweb.helpers.response :as response]
+            [funkyweb.helpers.session  :as session]
+            [funkyweb.helpers.cookies  :as cookies]
+            [funkyweb.helpers.flash    :as flash]))
+
+(defalias request-get   request/request-get)
+(defalias query-string  request/query-string)
+(defalias qs            request/query-string)
+
+(defalias response-set  response/response-set)
 
 (defalias session-set   session/session-set)
 (defalias session-get   session/session-get)
