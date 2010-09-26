@@ -249,13 +249,11 @@ query-string, qs
 
 flash-set
 
-    (GET index [] 
-      (flash-set :notice "this is a notice"))
+    (flash-set :notice "this is a notice")
 
 flash-get
 
-    (GET some-route []
-      (flash-get :notice))
+    (flash-get :notice)
 
 #### Cookies
 
@@ -270,13 +268,6 @@ the session
 cookies-get
 
     (cookies-get :foo)
-
-alter-cookies
- - takes a function and any number of arguments
-
-    (alter-cookies dissoc :foo)
-    (alter-cookies assoc :foo {:value "bar" :path "/"})
-
 
 #### Session
 
