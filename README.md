@@ -66,12 +66,7 @@ Actions defined with the POST macro responds to HTTP POST requests
 
     ; curl -d "name=foo" http://localhost:8080/say-hello
     ;  => Hello, foo!
-    (POST say-hello [name] (str "Hello, " name "!"))
-    
-    ; curl -d "" http://localhost:8080/say-hello/foo
-    ;  => Hello, foo!
-    (POST say-hello [name] (str "Hello, " name "!"))
-    
+    (POST say-hello [name] (str "Hello, " name "!"))     
 
 #### PUT
 
@@ -86,10 +81,6 @@ either real PUT's or fake ones with the _method hack.
     ;  => Hello, foo!
     (PUT say-hello [name] (str "Hello, " name "!"))
 
-    ; curl -d "_method=put" http://localhost:8080/say-hello/foo
-    ;  => Hello, foo!
-    (PUT say-hello [name] (str "Hello, " name "!"))
-
 #### DELETE
 
 Actions defined with the PUT macro responds to HTTP PUT requests,
@@ -100,10 +91,6 @@ either real PUT's or fake ones with the _method hack.
     (DELETE index [] "this is the index action")
 
     ; curl -d "name=foo" -d "_method=delete" http://localhost:8080/say-hello 
-    ;  => Hello, foo!
-    (DELETE say-hello [name] (str "Hello, " name "!"))
-
-    ; curl -d "_method=delete" http://localhost:8080/say-hello/foo
     ;  => Hello, foo!
     (DELETE say-hello [name] (str "Hello, " name "!"))
 
