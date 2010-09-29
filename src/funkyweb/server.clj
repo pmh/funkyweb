@@ -2,6 +2,7 @@
   (:use funkyweb.controller.router
         funkyweb.response
         (funkyweb.helpers session cookies request response)
+        (funkyweb.middleware params multipart-params)
         (ring.middleware session cookies flash)))
 
 (defmacro wrap!
@@ -28,5 +29,7 @@
   ([adapter-fn] (server adapter-fn {}))
   ([adapter-fn options]
      (do (wrap! (wrap-flash)
-                (wrap-session))
+                (wrap-session)
+                (wrap-params)
+                (wrap-multipart-params))
          (adapter-fn handler (merge {:port 8080 :join? false} options)))))

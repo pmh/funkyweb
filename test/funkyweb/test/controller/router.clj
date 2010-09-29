@@ -67,22 +67,6 @@
                                                       "4.03"]
        ['a 'b 'c]                 ["1" "2" "3"]      ["1" "2" "3"]))
 
-(deftest test-add-route
-  (are [method name args action]
-       (do
-         (binding [*controller-name* "/dashboard"]
-           (add-route method name args action)
-           (= @(method route-map) {"/dashboard/foo/:bar/" {:action    action
-                                                           :args-list args}})))
-       :get    'foo ['bar]      "baz"
-       :get    'foo [:int 'bar] "baz"
-       :put    'foo ['bar]      "baz"
-       :put    'foo [:int 'bar] "baz"
-       :post   'foo ['bar]      "baz"
-       :post   'foo [:int 'bar] "baz"
-       :delete 'foo ['bar]      "baz"
-       :delete 'foo [:int 'bar] "baz"))
-
 (deftest test-add-error-handler
   (are [status-code body]
        (do
@@ -125,14 +109,6 @@
        "foo/"     "foo/"
        "foo/bar"  "foo/bar/"
        "foo/bar/" "foo/bar/"))
-
-(deftest test-parse-form-params
-  (binding [slurp identity]
-    (is (= (parse-form-params {:body ""}) ""))
-    (is (= (parse-form-params {:body "a=b"}) "b"))
-    (is (= (parse-form-params {:body "a=b&c=d"}) "b/d"))
-    (is (= (parse-form-params {:body "a=b&c=d&e=f"}) "b/d/f"))
-    (is (= (parse-form-params {:body "_method=post"}) ""))))
 
 (deftest test-parse-args-list
   (are [args expected]

@@ -46,6 +46,7 @@
                          (conj ret (Float/parseFloat (first vals))))
           :double (recur (rest (rest args)) (rest vals)
                          (conj ret (Double/parseDouble (first vals))))
+          "*"     (recur [] [] (flatten (conj ret vals)))
           (recur (rest args) (rest vals) (conj ret (first vals))))
       ret)))
 
@@ -93,7 +94,9 @@
   references"
   [method name args action]
   (do
-    (swap! (method route-map) assoc (build-route name (strip-type-hints args))
+    (swap! (method route-map) assoc (build-route name (if (= method :get)
+                                                        (strip-type-hints args)
+                                                        []))
            {:action action :args-list args})
     nil))
 
@@ -131,16 +134,6 @@
     s
     (str s "/")))
 
-(defn parse-form-params [req]
-  (-> (:body req)
-      (.split "&")
-      (->> (map #(vec (.split % "=")))
-           (filter #(not (= (first %) "_method")))
-           (map #(vector (second %)))
-           (flatten)
-           (interpose "/")
-           (apply str))))
-
 (defn parse-args-list
   "Variadic arguments are passed in as a string with the
   arguments separated by slashes (/). This functions turns
@@ -153,9 +146,10 @@
   (parse-args-list [\"a\" \"b\"])
     ;=> (\"a\" \"b\")"
   [args]
-  (let [var-args (re-split #"\/" (last (flatten args)))]
-    (into (apply vector (butlast args))
-          (if-not (empty? (first var-args)) var-args []))))
+  (if (seq args)
+    (let [var-args (re-split #"\/" (last (flatten args)))]
+      (into (apply vector (butlast args))
+            (if-not (empty? (first var-args)) var-args [])))))
 
 (defn replace-varargs-with-star [args]
   "Searches parameter list for a variadic declaration
@@ -194,15 +188,14 @@
   Returns either the result of executing the action
   if one is found or nil otherwise"
   [req]
-  (let [req          (try (merge req {:body (slurp (:body req))})
-                          (catch Exception e req))
-        method       (extract-method req)
-        form-params  (parse-form-params req)
-        uri          (str (append-slash (str (:uri req))) form-params)
-        [route args] (some (partial match-route uri) (keys @(method route-map)))]
+  (let [method       (extract-method req)
+        uri          (append-slash (str (:uri req)))
+        [route args] (some (partial match-route uri) (keys @(method route-map)))
+        args         (if (= method :get)
+                       (reverse args)
+                       (map str (flatten (:params req))))
+        parsed-args  (parse-args-list args)]
     (if-let [match (get @(method route-map) route)]
-      (let [type-casted-args (cast-hinted-args (:args-list match) (reverse args))]
+      (let [type-casted-args (cast-hinted-args (:args-list match) parsed-args)]
         (apply (:action match)
-               (if (= "*" (last (:args-list match)))
-                 (parse-args-list type-casted-args)
-                 type-casted-args))))))
+               (filter #(seq (str %)) type-casted-args))))))

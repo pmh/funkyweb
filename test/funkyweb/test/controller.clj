@@ -10,7 +10,8 @@
        (binding [slurp identity]
          (funkyweb.controller.router/execute {:request-method method
                                               :uri uri
-                                              :body body}))))
+                                              :body body
+                                              :params []}))))
 
   (GET no-params [] "dashboard#no-params")
 
@@ -111,8 +112,7 @@
     (deftest test-post-action-method-returns-body
       (binding [funkyweb.controller.router/route-map route-map]
         (is (= (execute :post "/dashboard/no-params-post/")
-               "dashboard#no-params-post"))
-        (is (= (execute :post "/dashboard/with-params-post/foo") "foo"))))
+               "dashboard#no-params-post"))))
 
     (deftest test-put-url-helper
       (is (= (no-params-put) "/dashboard/no-params-put"))
@@ -121,8 +121,7 @@
     (deftest test-put-action-method-returns-body
       (binding [funkyweb.controller.router/route-map route-map]
         (is (= (execute :put "/dashboard/no-params-put/")
-               "dashboard#no-params-put"))
-        (is (= (execute :put "/dashboard/with-params-put/foo") "foo"))))
+               "dashboard#no-params-put"))))
 
     (deftest test-delete-url-helper
       (is (= (no-params-delete) "/dashboard/no-params-delete"))
@@ -131,8 +130,7 @@
     (deftest test-delete-action-method-returns-body
       (binding [funkyweb.controller.router/route-map route-map]
         (is (= (execute :delete "/dashboard/no-params-delete/")
-               "dashboard#no-params-delete"))
-        (is (= (execute :delete "/dashboard/with-params-delete/foo") "foo"))))))
+               "dashboard#no-params-delete"))))))
 
 (defcontroller blog->:id->posts
 
