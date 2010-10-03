@@ -169,19 +169,6 @@
         ret))
     args))
 
-(defn extract-method [req]
-  (try
-    (let [method (-> (:body req)
-                     (.split "&")
-                     (->> (map #(vec (.split % "=")))
-                          (filter #(= (first %) "_method"))
-                          (flatten)
-                          (second)
-                          (keyword)))]
-      (or method (:request-method req)))
-    (catch Exception e
-      (:request-method req))))
-
 (defn execute
   "Extracts the request-method and uri from the request
   and tries to find a route matching that signature.
