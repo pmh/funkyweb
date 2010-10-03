@@ -24,7 +24,6 @@
         resp   (wrapped-echo req)
         params (flatten (:params resp))]
     (is (= "bar" (first params)))
-    (println params)
     (let [upload (second params)]
       (is (= "test.txt" (:filename upload)))
       (is (= 5 (:size upload)))

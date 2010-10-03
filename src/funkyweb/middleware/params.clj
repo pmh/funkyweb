@@ -8,11 +8,14 @@
   "Parse parameters from a string into a vector."
   [^String param-string encoding]
   (reduce
-    (fn [param-vec encoded-param]
-      (if-let [[_ _ val] (re-matches #"([^=]+)=(.*)" encoded-param)]
-        (conj param-vec (codec/url-decode (or val "") encoding))
-        param-vec))
-    []
+    (fn [param-map encoded-param]
+      (if-let [[_ key val] (re-matches #"([^=]+)=(.*)" encoded-param)]
+        (if (= key "_method")
+          (assoc param-map :request-method (keyword val))
+          (update-in param-map [:params]
+                     #(conj % (codec/url-decode val encoding))))
+        param-map))
+    {:params []}
     (string/split param-string #"&")))
 
 (defn- assoc-query-params
@@ -32,10 +35,10 @@
 (defn assoc-form-params
   "Parse and assoc parameters from the request body with the request."
   [request encoding]
-  (merge-with merge request
+  (merge request
     (if-let [body (and (urlencoded-form? request) (:body request))]
       (let [params (parse-params (slurp body) encoding)]
-        {:params params}))))
+        params))))
 
 (defn wrap-params
   "Middleware to parse urlencoded parameters from the query string and form

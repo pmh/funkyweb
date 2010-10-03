@@ -11,6 +11,12 @@
         resp (wrapped-echo req)]
     (is (= ["bat%"] (:params resp)))))
 
+(deftest wrap-params-strips-method-and-sets-it-as-req-method
+  (let [req {:content-type "application/x-www-form-urlencoded"
+             :body         (tu/string-input-stream "_method=put&biz=bat")}
+        resp (wrapped-echo req)]
+    (is (= ["bat"] (:params resp)))
+    (is (= :put (:request-method resp)))))
 
 (deftest wrap-params-not-form-encoded
   (let [req  {:content-type "application/json"

@@ -188,7 +188,7 @@
   Returns either the result of executing the action
   if one is found or nil otherwise"
   [req]
-  (let [method       (extract-method req)
+  (let [method       (:request-method req)
         uri          (append-slash (str (:uri req)))
         [route args] (some (partial match-route uri) (keys @(method route-map)))
         args         (if (= method :get)
