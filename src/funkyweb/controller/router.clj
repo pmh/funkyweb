@@ -1,7 +1,7 @@
 (ns funkyweb.controller.router
   (:use [clojure.contrib.str-utils]
         [funkyweb.str-utils]
-        [funkyweb.helpers.request :only (map-to-qs)]
+        [funkyweb.helpers.request :only (map-to-qs query-string)]
         [clout.core]))
 
 (def *controller-name* nil)
@@ -188,7 +188,7 @@
   Returns either the result of executing the action
   if one is found or nil otherwise"
   [req]
-  (let [method       (:request-method req)
+  (let [method       (or (keyword (query-string :_method)) (:request-method req))
         uri          (append-slash (str (:uri req)))
         [route args] (some (partial match-route uri) (keys @(method route-map)))
         args         (if (= method :get)
