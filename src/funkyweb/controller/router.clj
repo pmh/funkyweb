@@ -4,7 +4,7 @@
         [funkyweb.helpers.request :only (map-to-qs query-string)]
         [clout.core]))
 
-(def *controller-name* nil)
+(def *controller-name* "")
 
 (def route-map {:get  (atom {}) :put    (atom {})
                 :post (atom {}) :delete (atom {})})
