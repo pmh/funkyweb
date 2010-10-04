@@ -180,7 +180,8 @@
         [route args] (some (partial match-route uri) (keys @(method route-map)))
         args         (if (= method :get)
                        (reverse args)
-                       (map str (flatten (:params req))))
+                       (into (apply vector (reverse args))
+                             (map str (flatten (:params req)))))
         parsed-args  (parse-args-list args)]
     (if-let [match (get @(method route-map) route)]
       (let [type-casted-args (cast-hinted-args (:args-list match) parsed-args)]
