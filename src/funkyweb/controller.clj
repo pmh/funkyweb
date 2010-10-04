@@ -25,7 +25,8 @@
 (defmacro DELETE [name args & forms]
   `(do
      (construct-url-helper ~name ~args)
-     (construct-route :delete ~name ~args ~forms)))
+     (construct-route :delete ~name ~args ~forms)
+     (construct-route :get ~name ~args ~forms)))
 
 (defn error [status-code body]
   (add-error-handler status-code body))
