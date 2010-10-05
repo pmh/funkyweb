@@ -6,4 +6,5 @@
                      [ ring/ring-jetty-adapter     "0.2.5"          ]
                      [ clout                       "0.2.0"          ]]
   :dev-dependencies [[ ring/ring-devel             "0.2.5"          ]
-                     [ swank-clojure               "1.3.0-SNAPSHOT" ]])
+                     [ swank-clojure               "1.3.0-SNAPSHOT" ]
+                     [ lein-clojars                "0.5.0-SNAPSHOT" ]])
