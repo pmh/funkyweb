@@ -48,8 +48,8 @@
         error-map funkyweb.controller.router/error-map]
 
     (deftest test-no-params-builds-a-uri
-      (is (= (no-params) "/dashboard/no-params"))
-      (is (= (no-params {:foo "bar"}) "/dashboard/no-params?foo=bar")))
+      (is (= (no-params) "/dashboard/no-params/"))
+      (is (= (no-params {:foo "bar"}) "/dashboard/no-params/?foo=bar")))
     (deftest test-no-params-action-method-returns-body
       (binding [funkyweb.controller.router/route-map route-map]
         (is (= (execute :get "/dashboard/no-params")
@@ -63,8 +63,8 @@
         (is (= (execute :get "/dashboard/say-hello/foo") "Hello, foo!"))))
     
     (deftest test-hello-foo-builds-a-uri
-      (is (= (hello-foo) "/dashboard/hello-foo"))
-      (is (= (hello-foo {:foo "bar"}) "/dashboard/hello-foo?foo=bar")))
+      (is (= (hello-foo) "/dashboard/hello-foo/"))
+      (is (= (hello-foo {:foo "bar"}) "/dashboard/hello-foo/?foo=bar")))
     (deftest test-hello-foo-action-method-returns-body
       (binding [funkyweb.controller.router/route-map route-map]
         (is (= (execute :get "/dashboard/hello-foo")
@@ -86,7 +86,7 @@
                 :body "404 - Not found"}))))
     
     (deftest test-stuff-builds-a-uri
-      (is (= (stuff)                     "/dashboard/stuff"))
+      (is (= (stuff)                     "/dashboard/stuff/"))
       (is (= (stuff "foo")               "/dashboard/stuff/foo"))
       (is (= (stuff "foo" {:foo "bar"})  "/dashboard/stuff/foo?foo=bar"))
       (is (= (stuff "foo" "bar")         "/dashboard/stuff/foo/bar"))
@@ -106,8 +106,8 @@
                 :body "404 - Not found"}))))
 
     (deftest test-post-url-helper
-      (is (= (no-params-post) "/dashboard/no-params-post"))
-      (is (= (with-params-post) "/dashboard/with-params-post"))
+      (is (= (no-params-post) "/dashboard/no-params-post/"))
+      (is (= (with-params-post) "/dashboard/with-params-post/"))
       (is (= (with-params-post "foo") "/dashboard/with-params-post/foo")))
     (deftest test-post-action-method-returns-body
       (binding [funkyweb.controller.router/route-map route-map]
@@ -115,8 +115,8 @@
                "dashboard#no-params-post"))))
 
     (deftest test-put-url-helper
-      (is (= (no-params-put) "/dashboard/no-params-put"))
-      (is (= (with-params-put) "/dashboard/with-params-put"))
+      (is (= (no-params-put) "/dashboard/no-params-put/"))
+      (is (= (with-params-put) "/dashboard/with-params-put/"))
       (is (= (with-params-put "foo") "/dashboard/with-params-put/foo")))
     (deftest test-put-action-method-returns-body
       (binding [funkyweb.controller.router/route-map route-map]
@@ -124,8 +124,8 @@
                "dashboard#no-params-put"))))
 
     (deftest test-delete-url-helper
-      (is (= (no-params-delete) "/dashboard/no-params-delete"))
-      (is (= (with-params-delete) "/dashboard/with-params-delete"))
+      (is (= (no-params-delete) "/dashboard/no-params-delete/"))
+      (is (= (with-params-delete) "/dashboard/with-params-delete/"))
       (is (= (with-params-delete "foo") "/dashboard/with-params-delete/foo")))
     (deftest test-delete-action-method-returns-body
       (binding [funkyweb.controller.router/route-map route-map]

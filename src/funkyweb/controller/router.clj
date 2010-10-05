@@ -2,7 +2,8 @@
   (:use [clojure.contrib.str-utils]
         [funkyweb.str-utils]
         [funkyweb.helpers.request :only (map-to-qs query-string)]
-        [clout.core]))
+        [clout.core])
+  (:require [clojure.string :as string]))
 
 (def *controller-name* "")
 
@@ -10,6 +11,20 @@
                 :post (atom {}) :delete (atom {})})
 
 (def error-map (atom {}))
+
+(defn append-slash
+  "Appends a forward slash to the end of the string
+  unless one is already present
+
+  (append-slash \"foo\")
+    ;=> \"foo/\"
+
+  (append-slash \"foo/\")
+    ;=> \"foo/\""
+  [s]
+  (if (ends-with? "/" s)
+    s
+    (str s "/")))
 
 (defn strip-type-hints
   "Takes an argument list and removes any
@@ -50,11 +65,20 @@
           (recur (rest args) (rest vals) (conj ret (first vals))))
       ret)))
 
-(defn- build-uri [name args]
-  (let [base (str *controller-name* "/" name)]
+(defn build-uri [name args]
+  (let [base (str *controller-name* "/" name "/")]
     (if (seq args)
-      (str base "/" (str-join "/" args))
-      (str base))))
+      (try
+        (let [matches (string/split base #":[a-z0-9]*\-?[a-z0-9]*")
+              c       (count matches)
+              args    (apply vector args)
+              args    (if (> c (count args)) (conj args nil) args)
+              base    (apply str (interleave matches (subvec args 0 c)))]
+          (let [uri (str (append-slash base) (apply str (subvec args c)))]
+            (if (ends-with? "/" uri)
+              (.substring uri 0 (dec (count uri)))
+              uri))))
+      (str base)))) 
 
 (defn build-route
   "Builds a route from the name and args
@@ -68,8 +92,12 @@
   (let [keyworded-args (map keyword (filter #(not (= "*" %)) args))
         non-base-args  (into []
                              (filter #(not (.contains *controller-name* (str %)))
-                                     keyworded-args))]
-    (build-uri name (conj non-base-args (first (filter #(= "*" %) args))))))
+                                     keyworded-args))
+        base           (str *controller-name* "/" name)
+        args           (conj non-base-args (first (filter #(= "*" %) args)))]
+    (if (seq args)
+      (str base "/" (str-join "/" args))
+      (str base))))
 
 (defn build-path
   "Builds a path from the name and args
@@ -84,7 +112,7 @@
   [name args]
   (let [partial-uri (partial build-uri name)]
     (if (map? (last args))
-      (str (partial-uri (butlast args)) "?"
+      (str (partial-uri (apply vector (butlast args))) "?"
            (map-to-qs   (last args)))
       (partial-uri args))))
 
@@ -119,20 +147,6 @@
   (let [escaped-uri (apply str (replace {\. \-} uri))]
     (if-let [match (route-matches route escaped-uri)]
       [route (map #(apply str (replace {\- \.} %)) (vals match))])))
-
-(defn append-slash
-  "Appends a forward slash to the end of the string
-  unless one is already present
-
-  (append-slash \"foo\")
-    ;=> \"foo/\"
-
-  (append-slash \"foo/\")
-    ;=> \"foo/\""
-  [s]
-  (if (ends-with? "/" s)
-    s
-    (str s "/")))
 
 (defn parse-args-list
   "Variadic arguments are passed in as a string with the

@@ -88,12 +88,24 @@
   (are [name args expected]
        (binding [*controller-name* "/dashboard"]
          (= (build-path name args) expected))
-       'bar []                   "/dashboard/bar"
+       'bar []                   "/dashboard/bar/"
        'foo [10]                 "/dashboard/foo/10"
        'foo [10 20]              "/dashboard/foo/10/20"
-       'foo [{:foo "bar"}]       "/dashboard/foo?foo=bar"
+       'foo [{:foo "bar"}]       "/dashboard/foo/?foo=bar"
        'foo [10 {:foo "bar"}]    "/dashboard/foo/10?foo=bar"
        'foo [10 20 {:foo "bar"}] "/dashboard/foo/10/20?foo=bar"))
+
+(deftest test-build-path-with-nested-routes
+  (binding [*controller-name* "/posts/:id/comments"]
+    (is (= (build-path 'create [10])       "/posts/10/comments/create"))
+    (is (= (build-path 'create [10 20])    "/posts/10/comments/create/20"))
+    (is (= (build-path 'create [10 20 30]) "/posts/10/comments/create/20/30"))))
+
+(deftest test-build-path-with-hyphenated-nested-routes
+  (binding [*controller-name* "/posts/:post-id/comments"]
+    (is (= (build-path 'create [10])       "/posts/10/comments/create"))
+    (is (= (build-path 'create [10 20])    "/posts/10/comments/create/20"))
+    (is (= (build-path 'create [10 20 30]) "/posts/10/comments/create/20/30"))))
 
 (deftest test-match-route
   (are [uri route expected]
