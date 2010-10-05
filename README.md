@@ -83,8 +83,8 @@ either real PUT's or fake ones with the _method hack.
 
 #### DELETE
 
-Actions defined with the PUT macro responds to HTTP PUT requests,
-either real PUT's or fake ones with the _method hack.
+Actions defined with the DELETE macro responds to HTTP DELETE requests,
+either real DELETE's or fake ones with the _method hack.
 
     ; curl -d "_method=delete" http://localhost:8080/index 
     ;  => this is the index action
@@ -105,7 +105,7 @@ either real PUT's or fake ones with the _method hack.
 
 #### Type hints 
 
-By using type hints funkyweb converts the parameters for you before your action is called and will return a 404 if the parameters don't match their specified types)
+By using type hints funkyweb converts the parameters for you before your action is called and will return a 404 if the parameters don't match their specified types
 
     (defcontroller dashboard
       
@@ -299,7 +299,7 @@ server
 
 ## Installation
 
-If your using leiningen add the following to your project.clj:
+If you are using leiningen add the following to your project.clj:
 
     :dependencies [[org.clojure/clojure "1.2.0"]
                    [org.clojure/clojure-contrib "1.2.0"]
