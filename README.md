@@ -299,7 +299,11 @@ server
 
 ## Installation
 
-FIXME: write me
+If your using leiningen add the following to your project.clj:
+
+    :dependencies [[org.clojure/clojure "1.2.0"]
+                   [org.clojure/clojure-contrib "1.2.0"]
+                   [funkyweb "0.1.0"]]
 
 ## License
 
