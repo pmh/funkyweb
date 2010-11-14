@@ -7,4 +7,5 @@
                      [ clout                       "0.2.0"          ]]
   :dev-dependencies [[ ring/ring-devel             "0.2.5"          ]
                      [ swank-clojure               "1.3.0-SNAPSHOT" ]
-                     [ lein-clojars                "0.5.0-SNAPSHOT" ]])
+                     [ lein-clojars                "0.5.0-SNAPSHOT" ]
+                     [ clojure-refactoring         "0.5.0"          ]])
