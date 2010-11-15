@@ -2,10 +2,12 @@
   (:use funkyweb.type-system
         funkyweb.router))
 
-(defn render-to-response [resource]
+(declare request)
+
+(defn render-to-response [body]
   {:status 200
    :headers {"Content-Type" "text/html"}
-   :body    (resource)})
+   :body    body})
 
 (defn handler [req]
-  (render-to-response (find-resource @routes req)))
+  (render-to-response (binding [request req] ((find-resource @routes req)))))
