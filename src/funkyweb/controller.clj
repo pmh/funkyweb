@@ -1,13 +1,9 @@
 (ns funkyweb.controller
-  (:use funkyweb.type-system
-        funkyweb.router))
+  (:use [funkyweb type-system router response renderer]))
 
 (declare request)
 
-(defn render-to-response [body]
-  {:status 200
-   :headers {"Content-Type" "text/html"}
-   :body    body})
-
 (defn handler [req]
-  (render-to-response (binding [request req] ((find-resource @routes req)))))
+  (binding [request  req
+            response (atom (merge response req))]
+    (render ((find-resource @routes req)) @response)))
