@@ -1,5 +1,6 @@
 (ns funkyweb.router
-  (:use [funkyweb.type-system :only (args-list)])
+  (:use [funkyweb.type-system :only (args-list)]
+        [clojure.string       :only (split)])
   (:require [clout.core :as clout]))
 
 (def routes (atom []))
@@ -12,8 +13,10 @@
   (swap! routes conj (compile-route route)))
 
 (defn extract-args [route match]
-  (let [args-list (args-list (:resource route))]
-    (map #(get match (name %)) args-list)))
+  (let [args-list (args-list (:resource route))
+        varargs   (get match "*")]
+    (remove nil? (into (vec (map #(get match (name %)) args-list))
+                       (if varargs (split varargs #"\/"))))))
 
 (defn route-matches [route req]
   (if-let [match (clout/route-matches (:path-spec route) req)]

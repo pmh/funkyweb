@@ -4,11 +4,13 @@
         [lazytest.describe    :only (describe it given with)]
         [lazytest.context     :only (fn-context)]))
 
-(def regular-resource (hinted-fn [] "foo"))
-(def id-resource      (hinted-fn [id] id))
+(def regular-resource  (hinted-fn [] "foo"))
+(def id-resource       (hinted-fn [id] id))
+(def variadic-resource (hinted-fn [foo & args] (str foo " : " args)))
 
-(def regular-route {:path-spec "/foo"     :resource regular-resource})
-(def id-route      {:path-spec "/foo/:id" :resource id-resource})
+(def regular-route  {:path-spec "/foo"        :resource regular-resource})
+(def id-route       {:path-spec "/foo/:id"    :resource id-resource})
+(def variadic-route {:path-spec "/foo/:foo/*" :resource variadic-resource})
 
 (def route-context (fn-context
                     (fn []
@@ -29,12 +31,15 @@
       (= @routes [{:path-spec "/foo" :resource regular-resource}]))))
 
 (describe extract-args "extracts the arguments from the clout match object based on the resource's argument list"
-  (given [no-args     (extract-args regular-route {})]
+  (given [no-args       (extract-args regular-route {})]
     (it "returns an empty argument list"
       (= no-args     [])))
-  (given [with-id-arg (extract-args id-route {"id" "1"})]
+  (given [with-id-arg   (extract-args id-route {"id" "1"})]
     (it "returns a 1 element argument list"
-      (= with-id-arg ["1"]))))
+      (= with-id-arg ["1"])))
+  (given [variadic-args (extract-args variadic-route {"foo" "foo" "*" "bar/baz"})]
+    (it "returns a 3 element argument list"
+      (= variadic-args ["foo" "bar" "baz"]))))
 
 (describe route-matches "wraps clout's route-matches function"
   (given [req {:uri "/foo"}]
