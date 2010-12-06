@@ -15,16 +15,35 @@
 (defn add-route [route]
   (swap! routes conj (compile-route route)))
 
-(defn extract-args [route match]
+(defn into-vec
+  ([first] (vec first))
+  ([first second] (into (vec first) second)))
+
+(defn extract-uri-args [route match]
   (let [args-list (args-list (:resource route))
         varargs   (get match "*")]
-    (remove nil? (into (vec (map #(get match (name %)) args-list))
-                       (if varargs (split varargs #"\/"))))))
+    (remove nil? (into-vec (map #(get match (name %)) args-list)
+                           (if varargs (split varargs #"\/"))))))
+
+(defn extract-form-args
+  ([route params]
+     (let [arglist (hinted-args-list (:resource route))]
+       (extract-form-args (filter #(or (= :map %) (symbol? %)) arglist) params [])))
+  ([arglist params acc]
+     (if-not (empty-seq? arglist)
+       (let [arg  (first arglist)
+             args (rest arglist)]
+         (if (= :map arg)
+           (recur (rest args) params (conj acc params))
+           (recur args params (conj acc (get params (keyword arg))))))
+       acc)))
 
 (defn route-matches [route req]
   (if-let [match (clout/route-matches (:path-spec route) req)]
-    [(:resource route) (extract-args route match)]))
+    (if (= :get (:request-method req))
+      [(:resource route) (extract-uri-args  route match)]
+      [(:resource route) (extract-form-args route (:params req))])))
 
-(defn find-resource [routes req]
-  (let [[resource args] (some (fn [route] (route-matches route req)) routes)]
+(defn find-resource-for [req]
+  (let [[resource args] (some (fn [route] (route-matches route req)) @routes)]
     (if (first args) (apply partial resource args) resource)))
