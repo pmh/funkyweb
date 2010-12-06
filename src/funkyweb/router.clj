@@ -1,7 +1,10 @@
 (ns funkyweb.router
-  (:use [funkyweb.type-system :only (args-list)]
-        [clojure.string       :only (split)])
+  (:use [funkyweb.type-system :only (args-list hinted-args-list hinted-fn coerce-to)]
+        [clojure.string       :only (split)]
+        funkyweb.utils)
   (:require [clout.core :as clout]))
+
+(defmethod coerce-to :map [[_ value]] value)
 
 (def routes (atom []))
 
