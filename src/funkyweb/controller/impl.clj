@@ -15,8 +15,8 @@
 
 (defmacro webfn [arglist body]
   (if `(some #(and (keyword? %) (not (= :map %))) '~arglist)
-    `(hinted-fn [~@arglist] ~@body)
-    `(with-meta (fn ['~@arglist] ~@body) {:arglist ['~@arglist]})))
+    `(hinted-fn [~@arglist] ~body)
+    `(with-meta (fn ['~@arglist] ~body) {:arglist ['~@arglist]})))
 
 (defn varargs-to-star [arglist]
   (if (empty-seq? (filter #{:& :map} arglist))
