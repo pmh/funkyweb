@@ -43,7 +43,6 @@
 (defmethod coerce-to :double [[_ value]]
   (try-or-throw (to-double value) (Exception. "Value must respond to to-double")))
 
-
 (defn cast-hinted-args [hinted-args-list args-list]
   (loop [acc [] hinted-args hinted-args-list args args-list]
     (if (seq args)
