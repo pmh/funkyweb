@@ -35,13 +35,13 @@
 (defmulti coerce-to first)
 
 (defmethod coerce-to :int [[_ value]]
-  (try-or-throw (to-int value) (Exception. "Value must respond to to-int")))
+  (try-or-throw (to-int value) (IllegalArgumentException. "Value must respond to to-int")))
 
 (defmethod coerce-to :float  [[_ value]]
-  (try-or-throw (to-float value) (Exception. "Value must respond to to-float")))
+  (try-or-throw (to-float value) (IllegalArgumentException. "Value must respond to to-float")))
 
 (defmethod coerce-to :double [[_ value]]
-  (try-or-throw (to-double value) (Exception. "Value must respond to to-double")))
+  (try-or-throw (to-double value) (IllegalArgumentException. "Value must respond to to-double")))
 
 (defn cast-hinted-args [hinted-args-list args-list]
   (loop [acc [] hinted-args hinted-args-list args args-list]
