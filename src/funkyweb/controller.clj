@@ -1,27 +1,35 @@
 (ns funkyweb.controller
-  (:use [funkyweb.controller.impl :only (build-route *controller-name* request)]
-        [funkyweb.router          :only (add-route find-resource-for)]
-        [funkyweb.response        :only (response)]
-        [funkyweb.renderer        :only (render)]))
+  (:use [funkyweb.controller.parser       :only (parse-form)]
+        [funkyweb.router                  :only (find-resource-for)]
+        [funkyweb.utils                   :only (to-keyword)]
+        [funkyweb.response                :only (response)]
+        [funkyweb.renderer                :only (render)]
+        [ring.middleware.params           :only (wrap-params)]
+        [ring.middleware.multipart-params :only (wrap-multipart-params)]
+        [ring.middleware.keyword-params   :only (wrap-keyword-params)]))
+
+(declare request)
 
 (defmacro defcontroller [name & forms]
-  `(binding [*controller-name* (str '~name)]
-     ~@forms))
+  (doseq [form (map #(conj % (to-keyword name)) forms)]
+    (parse-form form)))
 
-(defmacro GET [name uri? arglist & body]
-  `(add-route ~(build-route (list :get name uri? arglist body))))
-
-(defmacro PUT [name uri? arglist & body]
-  `(add-route ~(build-route (list :put name uri? arglist body))))
-
-(defmacro POST [name uri? arglist & body]
-  `(add-route ~(build-route (list :post name uri? arglist body))))
-
-(defmacro DELETE [name uri? arglist & body]
-  `(add-route ~(build-route (list :delete name uri? arglist body))))
+(defn- with-corrected-req-method [req]
+  (if-let [method (:_method req)]
+    (assoc req :request-method (keyword (.toLowerCase method)))
+    req))
 
 (defn- handler [req]
-  (binding [request  req
+  (binding [request  (with-corrected-req-method req)
             response (atom (merge response req))]
     (try (render ((find-resource-for req)) @response)
          (catch Exception ex (render [200 "text/html" "404 - not found"] {})))))
+(def app
+     (-> #'handler
+         (wrap-params)
+         (wrap-multipart-params)
+         (wrap-keyword-params)))
+
+(defn server [server-fn opts]
+  (let [opts (merge {:port 8080 :join? false} opts)]
+    (server-fn #'app opts)))
