@@ -23,12 +23,17 @@
 
 (defn form-to-route [form]
   (if (string? (nth form 3))
-    (let [[controller method action uri arglist & body] form]
+    (let [[controller method action uri arglist & body] form
+          action (to-keyword action)
+          method (to-keyword method)]
       (add-route
-       (eval `(to-route ~controller ~(to-keyword action) ~(to-keyword method) ~uri (hinted-fn [~@arglist] ~@body)))))
-    (let [[controller method action arglist & body] form]
+       (eval `(to-route ~controller ~action ~method ~uri (hinted-fn [~@arglist] ~@body)))))
+    (let [[controller method action arglist & body] form
+          method (to-keyword method)
+          action (to-keyword action)
+          path   (form-to-path form)]
       (add-route
-       (eval `(to-route ~controller ~(to-keyword action) ~(to-keyword method) ~(form-to-path form) (hinted-fn [~@arglist] ~@body)))))))
+       (eval `(to-route ~controller ~action ~method ~path (hinted-fn [~@arglist] ~@body)))))))
 
 (defmulti parse-form second)
 (defmethod parse-form 'GET [form]
