@@ -10,8 +10,11 @@
 
 (declare request)
 
+(defn with-controller-meta [controller form]
+  (with-meta form {:controller (to-keyword controller)}))
+
 (defmacro defcontroller [name & forms]
-  (doseq [form (map #(conj % (to-keyword name)) forms)]
+  (doseq [form (map with-controller-meta (repeat name) forms)]
     (parse-form form)))
 
 (defn- with-corrected-req-method [req]

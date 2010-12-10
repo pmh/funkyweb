@@ -11,7 +11,8 @@
      path)))
 
 (defn form-to-path [form]
-  (let [[controller _ action arglist _] form]
+  (let [[_ action arglist _] form
+        controller (:controller (meta form))]
     (varargs-to-star (str-interleave "/" (name controller) action (map keyword (remove keyword? arglist))))))
 
 (defn to-route [controller action method path-spec resource]
@@ -22,20 +23,21 @@
    :resource       resource})
 
 (defn form-to-route [form]
-  (if (string? (nth form 3))
-    (let [[controller method action uri arglist & body] form
-          action (to-keyword action)
-          method (to-keyword method)]
-      (add-route
-       (eval `(to-route ~controller ~action ~method ~uri (hinted-fn [~@arglist] ~@body)))))
-    (let [[controller method action arglist & body] form
-          method (to-keyword method)
-          action (to-keyword action)
-          path   (form-to-path form)]
-      (add-route
-       (eval `(to-route ~controller ~action ~method ~path (hinted-fn [~@arglist] ~@body)))))))
+  (let [controller (:controller (meta form))]
+    (if (string? (nth form 2))
+      (let [[method action uri arglist & body] form
+            action (to-keyword action)
+            method (to-keyword method)]
+        (add-route
+         (eval `(to-route ~controller ~action ~method ~uri (hinted-fn [~@arglist] ~@body)))))
+      (let [[method action arglist & body] form
+            method (to-keyword method)
+            action (to-keyword action)
+            path   (form-to-path form)]
+        (add-route
+         (eval `(to-route ~controller ~action ~method ~path (hinted-fn [~@arglist] ~@body))))))))
 
-(defmulti parse-form second)
+(defmulti parse-form first)
 (defmethod parse-form 'GET [form]
   (form-to-route form))
 (defmethod parse-form 'PUT [form]
