@@ -1,18 +1,24 @@
 (ns funkyweb.router
   (:use [funkyweb.type-system :only (args-list hinted-args-list hinted-fn coerce-to)]
+        [clojure.set          :only (select)]
         [clojure.string       :only (split)]
         funkyweb.utils)
   (:require [clout.core :as clout]))
 
 (defmethod coerce-to :map [[_ value]] value)
 
-(def routes (atom []))
+(def routes (atom #{}))
 
 (defn compile-route [route]
   (let [path-spec (:path-spec route)]
     (assoc route :path-spec (clout/route-compile path-spec))))
 
+(defn route-by [controller action]
+  #(and (= (:controller %) controller) (= (:action %) action)))
+
 (defn add-route [route]
+  (if-let [r (select (route-by (:controller route) (:action route)) @routes)]
+    (swap! routes disj (first r)))
   (swap! routes conj (compile-route route)))
 
 (defn into-vec
