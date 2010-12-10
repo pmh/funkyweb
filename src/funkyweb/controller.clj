@@ -30,6 +30,8 @@
          (wrap-multipart-params)
          (wrap-keyword-params)))
 
-(defn server [server-fn opts]
-  (let [opts (merge {:port 8080 :join? false} opts)]
-    (server-fn #'app opts)))
+(defn server
+  ([server-fn] (server server-fn {}))
+  ([server-fn opts]
+      (let [opts (merge {:port 8080 :join? false} opts)]
+        (server-fn #'app opts))))
