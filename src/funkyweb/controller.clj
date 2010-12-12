@@ -34,6 +34,12 @@
       (wrap-multipart-params)
       (wrap-keyword-params)))
 
+(defmacro wrap!
+  [& middlewares]
+  `(alter-var-root
+    #'handler
+    (constantly (-> handler ~@middlewares))))
+
 (defn server
   ([server-fn] (server server-fn {}))
   ([server-fn opts]
