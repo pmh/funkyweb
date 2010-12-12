@@ -10,7 +10,7 @@
 
 (declare request)
 
-(defn with-controller-meta [controller form]
+(defn- with-controller-meta [controller form]
   (with-meta form {:controller (to-keyword controller)}))
 
 (defmacro defcontroller [name & forms]
@@ -27,11 +27,12 @@
             response (atom (merge response req))]
     (try (render ((find-resource-for req)) @response)
          (catch Exception ex (render [200 "text/html" "404 - not found"] {})))))
-(def app
-     (-> #'handler
-         (wrap-params)
-         (wrap-multipart-params)
-         (wrap-keyword-params)))
+
+(def ^{:private true} app
+  (-> #'handler
+      (wrap-params)
+      (wrap-multipart-params)
+      (wrap-keyword-params)))
 
 (defn server
   ([server-fn] (server server-fn {}))
