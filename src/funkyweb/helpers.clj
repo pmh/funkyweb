@@ -10,6 +10,9 @@
    (select #(and (= (:controller %) controller)
                  (= (:action %) action)) @routes)))
 
+(defn call [controller action & args]
+  (apply (:resource (find-route controller action)) args))
+
 (defn- to-uri [route & args]
   (let [uri-regex #"\(\[\^\/\.\,\;\?\]\+\)|\(\.\*\?\)"
         path-spec (:regex (:path-spec route))
