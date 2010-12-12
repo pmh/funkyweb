@@ -1,12 +1,14 @@
 (ns funkyweb.controller
   (:use [funkyweb.controller.parser       :only (parse-form)]
-        [funkyweb.router                  :only (find-resource-for)]
+        [funkyweb.router                  :only (find-resource-for error-handlers)]
         [funkyweb.utils                   :only (to-keyword)]
         [funkyweb.response                :only (response)]
         [funkyweb.renderer                :only (render)]
         [ring.middleware.params           :only (wrap-params)]
         [ring.middleware.multipart-params :only (wrap-multipart-params)]
-        [ring.middleware.keyword-params   :only (wrap-keyword-params)]))
+        [ring.middleware.keyword-params   :only (wrap-keyword-params)]
+        [clojure.set                      :only (select)]
+        [clojure.string                   :only (split)]))
 
 (declare request)
 
@@ -25,8 +27,13 @@
 (defn- handler [req]
   (binding [request  (with-corrected-req-method req)
             response (atom (merge response req))]
-    (try (render ((find-resource-for req)) @response)
-         (catch Exception ex (render [200 "text/html" "404 - not found"] {})))))
+    (try
+      (render ((find-resource-for req)) @response)
+      (catch Exception ex
+        (let [exception (symbol (first (split (str ex) #":")))]
+          (if-let [error-handler (first (select exception @error-handlers))]
+            (render (eval (get error-handler exception)) @response)
+            (render 404 @response)))))))
 
 (def ^{:private true} app
   (-> #'handler

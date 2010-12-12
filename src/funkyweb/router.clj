@@ -7,7 +7,8 @@
 
 (defmethod coerce-to :map [[_ value]] value)
 
-(def routes (atom #{}))
+(def routes         (atom #{}))
+(def error-handlers (atom #{}))
 
 (defn compile-route [route]
   (let [path-spec (:path-spec route)]
@@ -15,6 +16,11 @@
 
 (defn route-by [controller action]
   #(and (= (:controller %) controller) (= (:action %) action)))
+
+(defn add-error-handler! [handler]
+  (if-let [e (select #(get % (ffirst handler)) @error-handlers)]
+    (swap! error-handlers disj (first e)))
+  (swap! error-handlers conj handler))
 
 (defn add-route [route]
   (if-let [r (select (route-by (:controller route) (:action route)) @routes)]

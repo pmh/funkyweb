@@ -1,5 +1,5 @@
 (ns funkyweb.controller.parser
-  (:use [funkyweb.router       :only (add-route)]
+  (:use [funkyweb.router       :only (add-route add-error-handler!)]
         [funkyweb.type-system  :only (hinted-fn)]
         [funkyweb.utils        :only (str-interleave to-keyword)]
         [clojure.string        :only (split)]))
@@ -38,11 +38,19 @@
          (eval `(to-route ~controller ~action ~method ~path (hinted-fn [~@arglist] ~@body))))))))
 
 (defmulti parse-form first)
+
 (defmethod parse-form 'GET [form]
   (form-to-route form))
+
 (defmethod parse-form 'PUT [form]
   (form-to-route form))
+
 (defmethod parse-form 'POST [form]
   (form-to-route form))
+
 (defmethod parse-form 'DELETE [form]
   (form-to-route form))
+
+(defmethod parse-form 'error [form]
+  (let [[_ type & body] form]
+    (add-error-handler! {type (conj body 'do)})))
