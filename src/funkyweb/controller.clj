@@ -24,9 +24,9 @@
     (assoc req :request-method (keyword (.toLowerCase method)))
     req))
 
-(defn- handler [req]
+(defn handler [req]
   (binding [request  (with-corrected-req-method req)
-            response (atom (merge response req))]
+            response (atom response)]
     (try
       (render ((find-resource-for req)) @response)
       (catch Exception ex
