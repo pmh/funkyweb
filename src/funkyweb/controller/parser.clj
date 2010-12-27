@@ -52,5 +52,8 @@
   (form-to-route form))
 
 (defmethod parse-form 'error [form]
-  (let [[_ type & body] form]
-    (add-error-handler! {type (conj body 'do)})))
+  (let [[_ type & body] form
+        body (conj body 'do)]
+    (if (symbol? type)
+      (add-error-handler! {(symbol (.getName (eval type))) body})
+      (add-error-handler! {type body}))))
