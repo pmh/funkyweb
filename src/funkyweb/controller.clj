@@ -19,13 +19,13 @@
   (doseq [form (map with-controller-meta (repeat name) forms)]
     (parse-form form)))
 
-(defn- with-corrected-req-method [req]
+(defn- fix-request-method [req]
   (if-let [method (:_method req)]
     (assoc req :request-method (keyword (.toLowerCase method)))
     req))
 
 (defn handler [req]
-  (binding [request  (with-corrected-req-method req)
+  (binding [request  (fix-request-method req)
             response (atom response)]
     (try
       (render ((find-resource-for req)) request @response)
