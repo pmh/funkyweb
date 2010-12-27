@@ -28,18 +28,18 @@
   (binding [request  (with-corrected-req-method req)
             response (atom response)]
     (try
-      (render ((find-resource-for req)) @response)
+      (render ((find-resource-for req)) request @response)
       (catch Exception ex
-        (let [exception (symbol (first (split (str ex) #":")))]
+        (let [exception (symbol (.getName (.getClass ex)))]
           (if-let [error-handler (first (select exception @error-handlers))]
-            (render (eval (get error-handler exception)) @response)
-            (render 404 @response)))))))
+            (render ((eval (get error-handler exception)) request response) request @response)
+            (render 404 request @response)))))))
 
 (def ^{:private true} app
   (-> #'handler
+      (wrap-keyword-params)
       (wrap-params)
-      (wrap-multipart-params)
-      (wrap-keyword-params)))
+      (wrap-multipart-params)))
 
 (defmacro wrap!
   [& middlewares]

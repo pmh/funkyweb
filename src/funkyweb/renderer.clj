@@ -5,24 +5,27 @@
 
 (defprotocol Renderer
   "Renders this as a valid Ring response"
-  (render [this response]))
+  (render [this request response]))
 
 (extend-protocol Renderer
   java.lang.String
-  (render [this response] (safe-merge response {:body this}))
+  (render [this _ response] (safe-merge response {:body this}))
 
   java.lang.Integer
-  (render [this response]
+  (render [this request response]
           (if-let [error-handler (first (select #(% this) @error-handlers))]
-            (render (eval (error-handler this)) response)
+            (render ((eval (get error-handler this)) request response) request response)
             (safe-merge response {:status this})))
   
   clojure.lang.PersistentVector
-  (render ([[status type body] response]
+  (render ([[status type body] _ response]
     (safe-merge response (to-response status (content-type type) body))))
 
+  clojure.lang.PersistentList
+  (render [this _ response] (safe-merge response {:body (str this)}))
+  
   clojure.lang.PersistentHashMap
-  (render [this response] (safe-merge response this))
+  (render [this _ response] (safe-merge response this))
 
   clojure.lang.PersistentArrayMap
-  (render [this response] (safe-merge response this)))
+  (render [this _ response] (safe-merge response this)))
