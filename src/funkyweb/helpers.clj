@@ -20,9 +20,11 @@
     {}))
 
 (defn map-to-qs [m]
-  (-> m vec
-      (->> (map (fn [[k v]] (str (name k) "=" (url-encode v))))
-           (join "&"))))
+  (if-not (empty-seq? m)
+    (-> m vec
+        (->> (map (fn [[k v]] (str (name k) "=" (url-encode v))))
+             (join "&")
+             (str "?")))))
 
 (defn- find-route [controller action]
   (first
@@ -32,18 +34,17 @@
 (defn call [controller action & args]
   (apply (:resource (find-route controller action)) args))
 
-(defn- to-uri [route & args]
+(defn to-uri [route & args]
   (if args
-    (let [qs   (if (map? (last args)) (last args)    {})
+    (let [qs   (if (map? (last args)) (last args))
           args (if (map? (last args)) (butlast args) args)
           base (-> (:path-spec route)
                    :regex
                    str
-                   (split #"\(\[\^\/\.\,\;\?\]\+\)|\(\.\*\?\)")
-                   (interleave args))]
-      (str (apply str base)
-           (str-interleave "/" (-> (vec args) (subvec (dec (count base)))))
-           (qs-to-map )))
+                   (split #"\(\[\^\/\.\,\;\?\]\+\)|\(\.\*\?\)"))]
+      (str (apply str (interleave  args))
+           (str-interleave "/" (-> (vec args) (subvec (count base))))
+           (map-to-qs qs)))
     (-> (:path-spec route) :regex str)))
 
 (defn redirect-to [controller action & args]
