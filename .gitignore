@@ -3,3 +3,8 @@ pom.xml
 lib
 classes
 /README.org
+/.cake/run/clean
+/.cake/run/default
+/.cake/run/deps
+/.cake/run/help
+/.cake/run/swank
