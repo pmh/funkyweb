@@ -10,10 +10,12 @@
         [clojure.set                      :only (select)]
         [clojure.string                   :only (split)]))
 
-(declare request)
+(def request nil)
 
 (defn- with-controller-meta [controller form]
-  (with-meta form {:controller (to-keyword controller)}))
+  (with-meta form {:controller (to-keyword controller)
+                   :request    request
+                   :response   response}))
 
 (defmacro defcontroller [name & forms]
   (doseq [form (map with-controller-meta (repeat name) forms)]
@@ -27,16 +29,16 @@
 (defn handle-exception [ex & {:keys [with-status]}]
   (let [exception (symbol (.getName (.getClass ex)))]
     (if-let [error-handler (first (select exception @error-handlers))]
-      (render ((eval (get error-handler exception)) request response) request @response)
-      (render with-status request @response))))
+      (render ((get error-handler exception) request response) request response)
+      (render with-status request response))))
 
 (defn handler [req]
   (binding [request  (fix-request-method req)
             response (atom response)]
     (try
       (if-let [resource (find-resource-for req)]
-        (render (resource) request @response)
-        (render 404 request @response))
+        (render (resource) request response)
+        (render 404 request response))
       (catch IllegalArgumentException ex
         (handle-exception ex :with-status 404))
       (catch Exception ex
@@ -50,8 +52,7 @@
       (wrap-params)
       (wrap-multipart-params)))
 
-(defmacro wrap!
-  [& middlewares]
+(defmacro wrap! [& middlewares]
   `(alter-var-root
     #'handler
     (constantly (-> handler ~@middlewares))))

@@ -9,23 +9,23 @@
 
 (extend-protocol Renderer
   java.lang.String
-  (render [this _ response] (safe-merge response {:body this}))
+  (render [this _ response] (safe-merge @response {:body this}))
 
   java.lang.Integer
   (render [this request response]
           (if-let [error-handler (first (select #(% this) @error-handlers))]
-            (render ((eval (get error-handler this)) request response) request response)
-            (safe-merge response {:status this})))
+            (render ((get error-handler this) request response) request @response)
+            (safe-merge @response {:status this})))
   
   clojure.lang.PersistentVector
   (render ([[status type body] _ response]
-    (safe-merge response (to-response status (content-type type) body))))
+    (safe-merge @response (to-response status (content-type type) body))))
 
   clojure.lang.PersistentList
-  (render [this _ response] (safe-merge response {:body (str this)}))
+  (render [this _ response] (safe-merge @response {:body (str this)}))
   
   clojure.lang.PersistentHashMap
-  (render [this _ response] (safe-merge response this))
+  (render [this _ response] (safe-merge @response this))
 
   clojure.lang.PersistentArrayMap
-  (render [this _ response] (safe-merge response this)))
+  (render [this _ response] (safe-merge @response this)))

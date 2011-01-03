@@ -12,8 +12,9 @@
 
 (defn form-to-path [form]
   (let [[_ action arglist _] form
-        controller (:controller (meta form))]
-    (varargs-to-star (str-interleave "/" (name controller) action (map keyword (remove keyword? arglist))))))
+        controller (name (:controller (meta form)))
+        arglist    (map keyword (remove keyword? arglist))]
+    (varargs-to-star (str-interleave "/" controller action arglist))))
 
 (defn to-route [controller action method path-spec resource]
   {:controller     controller
@@ -37,6 +38,14 @@
         (add-route
          (eval `(to-route ~controller ~action ~method ~path (hinted-fn [~@arglist] ~@body))))))))
 
+(defn to-fn [arglist body]
+  (eval (conj '() body arglist 'fn)))
+
+(defn parse-body [body]
+  (if (string? (first (flatten body)))
+    (first (flatten body))
+    body))
+
 (defmulti parse-form first)
 
 (defmethod parse-form 'GET [form]
@@ -53,7 +62,7 @@
 
 (defmethod parse-form 'error [form]
   (let [[_ type & body] form
-        body (conj body 'do)]
+        body (to-fn '[request response] (conj body 'do))]
     (if (symbol? type)
       (add-error-handler! {(symbol (.getName (eval type))) body})
       (add-error-handler! {type body}))))
