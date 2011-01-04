@@ -11,10 +11,12 @@
      path)))
 
 (defn form-to-path [form]
-  (let [[_ action arglist _] form
+  (let [[method action arglist _] form
         controller (name (:controller (meta form)))
         arglist    (map keyword (remove keyword? arglist))]
-    (varargs-to-star (str-interleave "/" controller action arglist))))
+    (if (= method 'GET)
+      (varargs-to-star (str-interleave "/" controller action arglist))
+      (str-interleave "/" controller action))))
 
 (defn to-route [controller action method path-spec resource]
   {:controller     controller
@@ -28,13 +30,15 @@
     (if (string? (nth form 2))
       (let [[method action uri arglist & body] form
             action (to-keyword action)
-            method (to-keyword method)]
+            method (to-keyword method)
+            arglist (if (not= :get method) (replace {'& :map} arglist) arglist)]
         (add-route
          (eval `(to-route ~controller ~action ~method ~uri (hinted-fn [~@arglist] ~@body)))))
       (let [[method action arglist & body] form
             method (to-keyword method)
             action (to-keyword action)
-            path   (form-to-path form)]
+            path   (form-to-path form)
+            arglist (if (not= :get method) (replace {'& :map} arglist) arglist)]
         (add-route
          (eval `(to-route ~controller ~action ~method ~path (hinted-fn [~@arglist] ~@body))))))))
 
