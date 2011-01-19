@@ -14,34 +14,15 @@ followed by any number of actions.
     (defcontroller dashboard
       ... actions ...)
 
-Controllers can also be nested using ->
-
-    ; generates the base route /blog/posts
-    (defcontroller blog->posts
-      ... actions ...)
-
-And they can contain dynamic parts
-
-    ; generates the base route /blog/:id/posts
-    (defcontroller blog->:id->posts
-      ... actions ...)
-
 ### Actions
 
-Actions are defined using the GET PUT POST or DELETE macros and
-normally reside within a controller
+Actions are defined using GET PUT POST or DELETE within a controller
 
-    (defcontroller dashboard
+            (defcontroller dashboard
 
       ; generates the route /dashboard/index
       (GET index []
         "Welcome to your dashboard))
-
-but can be standalone as well
-
-    ; generates the route /index
-    (GET index []
-      "This is the index")
 
 
 #### GET
@@ -96,12 +77,22 @@ either real DELETE's or fake ones with the _method hack.
 
 #### Variadic arguments
 
+There is support for variadic arguments but it's context sensitive, in a GET context it binds to a sequence like you expect:
+
     ; curl http://localhost:8080/numbers/10
     ;  => first number: 10 more: 
     ; curl http://localhost:8080/numbers/10/20/30
     ;  => first number: 10 more: (20 30)
     (GET numbers [first-number & more]
       (str "first number: " first-number " more: " more))
+
+However in a POST, PUT or DELETE context it will bind to a hash-map instead:
+
+    ; curl -d "first-number=10" -d "second-number=20" http://localhost:8080/numbers
+    ;  => first number: 10 more: {:second-number "20"}
+    (GET numbers [first-number & more]
+      (str "first number: " first-number " more: " more))
+
 
 #### Type hints 
 
