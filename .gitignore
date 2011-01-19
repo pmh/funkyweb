@@ -8,3 +8,4 @@ classes
 /.cake/run/deps
 /.cake/run/help
 /.cake/run/swank
+/src/funkyweb/controller/#parser.clj#
