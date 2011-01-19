@@ -14,7 +14,7 @@
   java.lang.Integer
   (render [this request response]
           (if-let [error-handler (first (select #(% this) @error-handlers))]
-            (render ((get error-handler this) request response) request @response)
+            (render ((get error-handler this) request response) request response)
             (safe-merge @response {:status this})))
   
   clojure.lang.PersistentVector
